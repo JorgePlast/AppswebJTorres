@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plastimet S.A. | Sistema de Cobranzas v3.0 (Cloud Edition)</title>
+    <title>Plastimet S.A. | Sistema de Cobranzas v3.1 (Cloud Edition)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
@@ -41,7 +41,7 @@
                     </div>
                     <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto">
                         <span class="font-bold text-sm tracking-tight text-white block uppercase">Plastimet S.A.</span>
-                        <span class="text-[9px] text-sky-400 font-semibold uppercase tracking-wider">Cloud Edition v3.0</span>
+                        <span class="text-[9px] text-sky-400 font-semibold uppercase tracking-wider">Cloud Edition v3.1</span>
                     </div>
                 </div>
             </div>
@@ -221,7 +221,6 @@
         </div>
     </main>
 
-    <!-- MODALES OMITIDOS PARA BREVEDAD (SON LOS MISMOS QUE LA V2.6 PERO CON LLAMADAS API) -->
     <!-- MODAL DE GESTIÓN -->
     <div id="modal-gestion" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
         <div class="fin-card w-full max-w-md rounded-2xl p-6 relative shadow-2xl">
@@ -317,12 +316,11 @@
         // CONFIGURACIÓN DE LA NUBE (LA URL DE TU GOOGLE APPS SCRIPT)
         const API_URL = "https://script.google.com/macros/s/AKfycbwY48Bi-WQWZ6BAkz4SwLQTHpQKzfPvbdxSD7gRPWGmuFO8N3CQ9BMTTUlujMEs80-VLw/exec";
         
-        let cartera = JSON.parse(localStorage.getItem('plastimet_cartera_v30')) || [];
-        let gestiones = []; // Ahora la memoria maestra viene de Google Sheets
+        let cartera = JSON.parse(localStorage.getItem('plastimet_cartera_v31')) || [];
+        let gestiones = []; 
         let chartAgingObj = null; 
         let chartFlujoObj = null;
 
-        // INICIALIZACIÓN Y CONEXIÓN CLOUD
         window.onload = async function() {
             document.getElementById('topbar-date').innerText = new Date().toLocaleDateString('es-EC');
             initMonthsFilter();
@@ -337,14 +335,11 @@
                 console.error("Error conectando a la Nube:", error);
                 document.getElementById('cloud-status').innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Modo Local (Nube Inaccesible)';
                 document.getElementById('cloud-status').className = "text-xs font-bold text-rose-400 bg-rose-500/10 px-3 py-1.5 rounded-lg flex items-center gap-2";
-                // Rescate local si no hay internet
                 gestiones = JSON.parse(localStorage.getItem('plastimet_gestiones_cloud_backup')) || [];
             }
             
-            // Backup local por seguridad
             localStorage.setItem('plastimet_gestiones_cloud_backup', JSON.stringify(gestiones));
 
-            // Quitar pantalla de carga
             const loader = document.getElementById('cloud-loader');
             loader.classList.add('opacity-0');
             setTimeout(() => loader.classList.add('hidden'), 500);
@@ -353,7 +348,6 @@
             else switchView('sync');
         };
 
-        // FUNCIÓN MAESTRA PARA ENVIAR A GOOGLE SHEETS
         function apiCall(payload) {
             fetch(API_URL, {
                 method: 'POST',
@@ -382,7 +376,6 @@
             if(view === 'flujo') renderFlujoChart();
         }
 
-        // ---------- LECTURA DE EXCEL (LOCAL) ----------
         function procesarSaldosExcel(e) {
             const file = e.target.files[0];
             if(!file) return;
@@ -421,10 +414,10 @@
                     
                     if(nuevasFacturas.length > 0) {
                         cartera = nuevasFacturas;
-                        localStorage.setItem('plastimet_cartera_v30', JSON.stringify(cartera));
+                        localStorage.setItem('plastimet_cartera_v31', JSON.stringify(cartera));
                         alert(`Plastimet S.A. | Matriz Actualizada: ${cartera.length} facturas.
 
-Nota: Las gestiones registradas en la nube no se han borrado.`);
+Nota: Las gestiones registradas en la nube se han conservado.`);
                         switchView('dashboard');
                     } else {
                         alert("No se hallaron saldos legibles.");
@@ -435,11 +428,19 @@ Nota: Las gestiones registradas en la nube no se han borrado.`);
             reader.readAsArrayBuffer(file);
         }
 
-        // ---------- RENDERIZADO CRM ULTRA-FAST CON SEMÁFORO ----------
+        // ---------- RENDERIZADO CRM INTELIGENTE (MANTIENE ACORDEONES ABIERTOS) ----------
         function renderCRMTable() {
             const search = document.getElementById('crm-search').value.toLowerCase();
             const tbody = document.getElementById('table-crm');
             
+            // 1. Guardar qué acordeones están actualmente desplegados (abiertos)
+            const acordeonesAbiertos = [];
+            tbody.querySelectorAll('tr[id^="cliente-"]').forEach(tr => {
+                if (!tr.classList.contains('hidden')) {
+                    acordeonesAbiertos.push(tr.id);
+                }
+            });
+
             const agrupado = cartera.reduce((acc, c) => {
                 if (!acc[c.cliente]) {
                     acc[c.cliente] = { total: 0, facturas: [], rangos: { 'Corriente': 0, '1-30': 0, '31-60': 0, '61-90': 0, '91-120': 0, '120+': 0 } };
@@ -465,10 +466,16 @@ Nota: Las gestiones registradas en la nube no se han borrado.`);
                 const row = agrupado[cliente];
                 const rowId = 'cliente-' + btoa(unescape(encodeURIComponent(cliente))).replace(/[^a-zA-Z0-9]/g, '');
 
+                // 2. Determinar si este cliente estaba abierto antes de recargar
+                const estaAbierto = acordeonesAbiertos.includes(rowId);
+                const claseHidden = estaAbierto ? "" : "hidden";
+                const iconoChevron = estaAbierto ? "fa-chevron-up" : "fa-chevron-down";
+
                 buffer += `
-                    <tr class="hover:bg-[#1e293b]/50 border-b border-[#334155]/40 text-[11px] cursor-pointer transition-colors" onclick="document.getElementById('${rowId}').classList.toggle('hidden')">
+                    <tr class="hover:bg-[#1e293b]/50 border-b border-[#334155]/40 text-[11px] cursor-pointer transition-colors" 
+                        onclick="const el=document.getElementById('${rowId}'); el.classList.toggle('hidden'); const ic=this.querySelector('.chevron-icon'); if(el.classList.contains('hidden')){ic.classList.replace('fa-chevron-up','fa-chevron-down')}else{ic.classList.replace('fa-chevron-down','fa-chevron-up')}">
                         <td class="px-4 py-3 font-bold text-sky-300 max-w-[180px] truncate" title="${cliente}">
-                            <i class="fa-solid fa-chevron-down text-[9px] mr-2 text-slate-500"></i>${cliente}
+                            <i class="fa-solid ${iconoChevron} text-[9px] mr-2 text-slate-500 chevron-icon"></i>${cliente}
                         </td>
                         <td class="px-2 py-3 text-center font-mono text-emerald-400">${row.rangos['Corriente'] > 0 ? '$' + row.rangos['Corriente'].toLocaleString(undefined, {minimumFractionDigits:2}) : '-'}</td>
                         <td class="px-2 py-3 text-center font-mono text-amber-400">${row.rangos['1-30'] > 0 ? '$' + row.rangos['1-30'].toLocaleString(undefined, {minimumFractionDigits:2}) : '-'}</td>
@@ -478,11 +485,10 @@ Nota: Las gestiones registradas en la nube no se han borrado.`);
                         <td class="px-2 py-3 text-center font-mono text-red-600 font-bold">${row.rangos['120+'] > 0 ? '$' + row.rangos['120+'].toLocaleString(undefined, {minimumFractionDigits:2}) : '-'}</td>
                         <td class="px-4 py-3 text-right font-mono font-bold text-white">$${row.total.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
                     </tr>
-                    <tr id="${rowId}" class="hidden bg-[#0f172a]/80 border-b border-[#334155]">
+                    <tr id="${rowId}" class="${claseHidden} bg-[#0f172a]/80 border-b border-[#334155]">
                         <td colspan="8" class="px-8 py-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                                 ${row.facturas.sort((a,b) => b.dias - a.dias).map(f => {
-                                    // Semáforo basado en Nube
                                     const matchGestion = gestiones.find(g => g.facturaId === f.id);
                                     let cardBg = "bg-[#1e293b] border-slate-700";
                                     let badgeStatus = "";
@@ -611,10 +617,21 @@ Nota: Las gestiones registradas en la nube no se han borrado.`);
             };
 
             gestiones.push(nuevaGestion);
-            apiCall(nuevaGestion); // Guarda en Google Sheets sin congelar la pantalla
+            apiCall(nuevaGestion); 
             
             localStorage.setItem('plastimet_gestiones_cloud_backup', JSON.stringify(gestiones));
-            closeModal(); renderCRMTable(); alert('Guardado en la Nube de Plastimet S.A.');
+            closeModal(); 
+            renderCRMTable(); // Redibuja pero ahora mantiene abierto el acordeón del cliente
+            
+            // Pequeña notificación visual sin bloquear el trabajo con un alert()
+            const btnSubmit = document.querySelector('#form-gestion button[type="submit"]');
+            const originalText = btnSubmit.innerHTML;
+            btnSubmit.innerHTML = '<i class="fa-solid fa-check"></i> ¡Guardado!';
+            btnSubmit.classList.replace('bg-sky-600', 'bg-emerald-600');
+            setTimeout(() => {
+                btnSubmit.innerHTML = originalText;
+                btnSubmit.classList.replace('bg-emerald-600', 'bg-sky-600');
+            }, 1500);
         }
 
         // ---------- BITÁCORA "LO GESTIONADO" ----------
@@ -712,7 +729,6 @@ Nota: Las gestiones registradas en la nube no se han borrado.`);
                 gVieja.saldoPendiente = 0;
                 gVieja.log += ` | [PROMESA ROTA EL ${hoy}]: ${motivo}`;
 
-                // Actualizar la vieja en Google Sheets
                 apiCall({
                     action: 'update', id: gVieja.id,
                     valorRecuperado: gVieja.valorRecuperado,
@@ -720,7 +736,6 @@ Nota: Las gestiones registradas en la nube no se han borrado.`);
                     estado: gVieja.estado, log: gVieja.log
                 });
 
-                // Crear la nueva en Google Sheets
                 const nuevaGestion = {
                     action: 'add', id: Date.now() + Math.random().toString().slice(2, 6),
                     facturaId: gVieja.facturaId, factura: gVieja.factura, cliente: gVieja.cliente,
