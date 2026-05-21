@@ -206,15 +206,56 @@
 
             <!-- VIEW: SYNC EXCEL -->
             <section id="view-sync" class="hidden max-w-3xl mx-auto space-y-6">
+
+                <!-- Estado de la cartera en la nube -->
+                <div id="cartera-cloud-info" class="hidden fin-card p-5 rounded-2xl border-l-4 border-l-emerald-500 flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-cloud-check text-emerald-400 text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-white uppercase tracking-wider">Cartera sincronizada en la nube</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Última actualización: <span id="cartera-cloud-fecha" class="text-emerald-400 font-mono">—</span></p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-1.5 rounded-full font-bold whitespace-nowrap">
+                        <i class="fa-solid fa-users mr-1"></i>Visible para todos
+                    </span>
+                </div>
+
+                <!-- Sin cartera en la nube todavía -->
+                <div id="cartera-sin-nube" class="fin-card p-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 flex items-center gap-3">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400 text-xl flex-shrink-0"></i>
+                    <div>
+                        <p class="text-xs font-bold text-amber-300">La cartera aún no está en la nube</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">Carga el Excel una vez para que todos los usuarios puedan ver el dashboard sin subir archivos.</p>
+                    </div>
+                </div>
+
+                <!-- Upload zone -->
                 <div class="fin-card p-8 rounded-2xl shadow-xl border-2 border-dashed border-[#334155] hover:border-sky-500 transition-colors text-center">
                     <input type="file" id="excel-upload" accept=".xlsx,.xls,.csv" class="hidden" onchange="procesarSaldosExcel(event)">
                     <label for="excel-upload" class="cursor-pointer flex flex-col items-center">
-                        <div class="w-16 h-16 rounded-full bg-sky-500/10 text-sky-400 flex items-center justify-center text-3xl mb-4">
-                            <i class="fa-solid fa-file-excel"></i>
+                        <div class="w-16 h-16 rounded-full bg-sky-500/10 text-sky-400 flex items-center justify-center text-3xl mb-4 hover:bg-sky-500/20 transition-colors">
+                            <i class="fa-solid fa-file-arrow-up"></i>
                         </div>
-                        <h3 class="text-lg font-bold text-white uppercase tracking-tight">Actualizar Base Plastimet S.A.</h3>
-                        <p class="text-sm text-slate-400 mt-2">Sube tu Excel. La cartera se actualizará pero las gestiones de la nube se mantendrán intactas.</p>
+                        <h3 class="text-lg font-bold text-white uppercase tracking-tight">Actualizar Cartera Plastimet S.A.</h3>
+                        <p class="text-sm text-slate-400 mt-2 max-w-sm">Sube el Excel exportado del sistema. La cartera se actualizará en la nube y será visible para todos los usuarios.</p>
+                        <span class="mt-4 bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-bold px-4 py-2 rounded-xl">
+                            <i class="fa-solid fa-cloud-arrow-up mr-2"></i>Seleccionar archivo Excel / CSV
+                        </span>
                     </label>
+                </div>
+
+                <!-- Info box -->
+                <div class="fin-card p-4 rounded-2xl border border-[#334155] text-xs text-slate-400 space-y-2">
+                    <p class="font-bold text-white text-[11px] uppercase tracking-wider"><i class="fa-solid fa-circle-info text-sky-400 mr-2"></i>¿Cómo funciona la sincronización?</p>
+                    <ul class="space-y-1.5 ml-5 list-disc marker:text-sky-500">
+                        <li>Al cargar el Excel, la cartera de facturas se sube automáticamente a Google Sheets.</li>
+                        <li>Cualquier usuario que abra la app verá el dashboard completo sin necesidad de subir archivos.</li>
+                        <li>Las gestiones (cobros, promesas, reprogramaciones) siempre se sincronizan en tiempo real.</li>
+                        <li>Solo necesitas subir el Excel cuando haya nuevas facturas o actualizaciones de saldos.</li>
+                    </ul>
                 </div>
             </section>
 
@@ -328,8 +369,22 @@
             try {
                 const response = await fetch(API_URL);
                 const data = await response.json();
-                if(Array.isArray(data)) {
+
+                // Soporte para respuesta combinada { gestiones, cartera } o array legacy
+                if (Array.isArray(data)) {
                     gestiones = data;
+                } else if (data && typeof data === 'object') {
+                    gestiones = Array.isArray(data.gestiones) ? data.gestiones : [];
+                    if (Array.isArray(data.cartera) && data.cartera.length > 0) {
+                        cartera = data.cartera;
+                        localStorage.setItem('plastimet_cartera_v31', JSON.stringify(cartera));
+                        if (data.carteraUpdatedAt) {
+                            const el = document.getElementById('cartera-cloud-fecha');
+                            if (el) el.innerText = data.carteraUpdatedAt;
+                            const wrap = document.getElementById('cartera-cloud-info');
+                            if (wrap) wrap.classList.remove('hidden');
+                        }
+                    }
                 }
             } catch(error) {
                 console.error("Error conectando a la Nube:", error);
@@ -415,9 +470,17 @@
                     if(nuevasFacturas.length > 0) {
                         cartera = nuevasFacturas;
                         localStorage.setItem('plastimet_cartera_v31', JSON.stringify(cartera));
-                        alert(`Plastimet S.A. | Matriz Actualizada: ${cartera.length} facturas.
-
-Nota: Las gestiones registradas en la nube se han conservado.`);
+                        // Sincronizar cartera a la nube
+                        const ts = new Date().toLocaleString('es-EC');
+                        apiCall({ action: 'saveCartera', cartera: cartera, updatedAt: ts });
+                        // Actualizar info en vista sync
+                        const el = document.getElementById('cartera-cloud-fecha');
+                        if (el) el.innerText = ts;
+                        const wrap = document.getElementById('cartera-cloud-info');
+                        if (wrap) wrap.classList.remove('hidden');
+                        const sinNube = document.getElementById('cartera-sin-nube');
+                        if (sinNube) sinNube.classList.add('hidden');
+                        alert(`Plastimet S.A. | Matriz Actualizada: ${cartera.length} facturas.\n\nLa cartera se está sincronizando con la nube. Las gestiones registradas se han conservado.`);
                         switchView('dashboard');
                     } else {
                         alert("No se hallaron saldos legibles.");
