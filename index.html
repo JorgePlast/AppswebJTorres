@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plastimet S.A. | Sistema de Cobranzas v3.1 (Cloud Edition)</title>
+    <title>Plastimet S.A. | CxC Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
@@ -20,6 +20,11 @@
         .tab-active { background-color: #334155; color: #38bdf8; border-left: 4px solid #38bdf8; }
         .sidebar-transition { transition: width 300px cubic-bezier(0.4, 0, 0.2, 1); }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+        .filt-btn{background:#1e293b;border:1px solid #334155;color:#94a3b8;border-radius:.4rem;padding:.25rem .75rem;font-size:.7rem;cursor:pointer;transition:all .15s;white-space:nowrap;}
+        .filt-btn:hover{color:#fff;border-color:#475569;}
+        .filt-btn.active{background:#3b82f6;border-color:#3b82f6;color:#fff;}
+        .filt-btn.nodata{opacity:.3;cursor:not-allowed;}
+        .kpi-val{font-variant-numeric:tabular-nums;letter-spacing:-.02em;}
     </style>
 </head>
 <body class="h-screen flex overflow-hidden">
@@ -41,15 +46,15 @@
                     </div>
                     <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto">
                         <span class="font-bold text-sm tracking-tight text-white block uppercase">Plastimet S.A.</span>
-                        <span class="text-[9px] text-sky-400 font-semibold uppercase tracking-wider">Cloud Edition v3.1</span>
+                        <span class="text-[9px] text-sky-400 font-semibold uppercase tracking-wider">CxC Suite v1.0</span>
                     </div>
                 </div>
             </div>
             
             <nav class="mt-6 px-2 space-y-1 whitespace-nowrap">
                 <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-3 py-3 rounded-xl text-xs font-medium text-slate-400 hover:bg-[#1e293b] hover:text-white transition-all tab-active">
-                    <i class="fa-solid fa-chart-pie text-base w-5 text-center flex-shrink-0"></i> 
-                    <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Dashboard</span>
+                    <i class="fa-solid fa-chart-line text-base w-5 text-center text-sky-400 flex-shrink-0"></i> 
+                    <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Dashboard CxC</span>
                 </button>
                 <button onclick="switchView('crm')" id="nav-crm" class="w-full flex items-center gap-4 px-3 py-3 rounded-xl text-xs font-medium text-slate-400 hover:bg-[#1e293b] hover:text-white transition-all">
                     <i class="fa-solid fa-table-list text-base w-5 text-center flex-shrink-0"></i> 
@@ -74,7 +79,7 @@
     <!-- CONTENEDOR CENTRAL -->
     <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
         <header class="h-20 bg-[#0f172a]/90 backdrop-blur border-b border-[#334155] flex items-center justify-between px-6 z-10">
-            <h1 id="page-title" class="text-xl font-bold text-white uppercase tracking-tight">Dashboard Plastimet S.A.</h1>
+            <h1 id="page-title" class="text-xl font-bold text-white uppercase tracking-tight">Dashboard CxC Plastimet S.A.</h1>
             <div class="flex items-center gap-4">
                 <div id="cloud-status" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg flex items-center gap-2">
                     <span class="relative flex h-2 w-2">
@@ -91,46 +96,133 @@
 
         <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-[#0b0f19]">
 
-            <!-- VIEW: DASHBOARD -->
+            <!-- VIEW: DASHBOARD CXC -->
             <section id="view-dashboard" class="space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="fin-card p-5 rounded-2xl border-l-4 border-l-sky-500 shadow-xl">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Cartera Total</span>
-                        <h3 id="kpi-total" class="text-2xl font-black text-white font-mono mt-1">$0.00</h3>
+
+                <!-- Filtros de período -->
+                <div class="fin-card p-4 rounded-2xl flex flex-wrap items-center gap-2">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Período:</span>
+                    <button class="filt-btn active" data-f="all" onclick="setCxcFilter('all',this)">Todo el año</button>
+                    <button class="filt-btn" data-f="q1" onclick="setCxcFilter('q1',this)">Q1</button>
+                    <button class="filt-btn" data-f="q2" onclick="setCxcFilter('q2',this)">Q2</button>
+                    <button class="filt-btn" data-f="ene" onclick="setCxcFilter('ene',this)">Ene</button>
+                    <button class="filt-btn" data-f="feb" onclick="setCxcFilter('feb',this)">Feb</button>
+                    <button class="filt-btn" data-f="mar" onclick="setCxcFilter('mar',this)">Mar</button>
+                    <button class="filt-btn" data-f="abr" onclick="setCxcFilter('abr',this)">Abr</button>
+                    <button class="filt-btn" data-f="may" onclick="setCxcFilter('may',this)">May</button>
+                    <div class="ml-auto text-[10px] text-slate-500 font-mono" id="cxc-corte-lbl"></div>
+                </div>
+
+                <!-- KPI Cards - 7 tarjetas -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+                    <div class="fin-card p-4 rounded-2xl border-l-4 border-l-sky-500">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-tight">Facturado</span>
+                        <h3 id="kpi-cxc-fact" class="text-xl font-black text-sky-400 font-mono kpi-val mt-1">$0</h3>
+                        <p id="kpi-cxc-fact-sub" class="text-[9px] text-slate-500 mt-0.5 truncate"></p>
                     </div>
-                    <div class="fin-card p-5 rounded-2xl border-l-4 border-l-rose-500 shadow-xl">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Vencido Activo</span>
-                        <h3 id="kpi-vencido" class="text-2xl font-black text-rose-400 font-mono mt-1">$0.00</h3>
+                    <div class="fin-card p-4 rounded-2xl border-l-4 border-l-amber-400">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-tight">Cartera Total</span>
+                        <h3 id="kpi-cxc-cartera" class="text-xl font-black text-amber-400 font-mono kpi-val mt-1">$0</h3>
+                        <p id="kpi-cxc-cartera-sub" class="text-[9px] text-slate-500 mt-0.5 truncate"></p>
                     </div>
-                    <div class="fin-card p-5 rounded-2xl border-l-4 border-l-amber-500 shadow-xl">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Por Vencer</span>
-                        <h3 id="kpi-corriente" class="text-2xl font-black text-amber-400 font-mono mt-1">$0.00</h3>
+                    <div class="fin-card p-4 rounded-2xl border-l-4 border-l-emerald-400">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-tight">Por Vencer</span>
+                        <h3 id="kpi-cxc-pv" class="text-xl font-black text-emerald-400 font-mono kpi-val mt-1">$0</h3>
+                        <p id="kpi-cxc-pv-sub" class="text-[9px] text-slate-500 mt-0.5 truncate"></p>
                     </div>
-                    <div class="fin-card p-5 rounded-2xl border-l-4 border-l-emerald-500 shadow-xl">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">DSO Promedio</span>
-                        <h3 id="kpi-dso" class="text-2xl font-black text-emerald-400 font-mono mt-1">0 Días</h3>
+                    <div class="fin-card p-4 rounded-2xl border-l-4 border-l-rose-500">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-tight">Vencida</span>
+                        <h3 id="kpi-cxc-venc" class="text-xl font-black text-rose-400 font-mono kpi-val mt-1">$0</h3>
+                        <p id="kpi-cxc-venc-sub" class="text-[9px] text-slate-500 mt-0.5 truncate"></p>
+                    </div>
+                    <div class="fin-card p-4 rounded-2xl border-l-4 border-l-violet-500">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-tight">Cobrado</span>
+                        <h3 id="kpi-cxc-cob" class="text-xl font-black text-violet-400 font-mono kpi-val mt-1">$0</h3>
+                        <p id="kpi-cxc-cob-sub" class="text-[9px] text-slate-500 mt-0.5 truncate"></p>
+                    </div>
+                    <div class="fin-card p-4 rounded-2xl border-l-4 border-l-cyan-400">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-tight">Eficacia</span>
+                        <h3 id="kpi-cxc-efic" class="text-xl font-black text-cyan-400 font-mono kpi-val mt-1">—</h3>
+                        <p id="kpi-cxc-efic-sub" class="text-[9px] text-slate-500 mt-0.5 truncate"></p>
+                    </div>
+                    <div class="fin-card p-4 rounded-2xl border-l-4 border-l-blue-400">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-tight">DSO</span>
+                        <h3 id="kpi-cxc-dso" class="text-xl font-black text-blue-400 font-mono kpi-val mt-1">— d</h3>
+                        <p id="kpi-cxc-dso-sub" class="text-[9px] text-slate-500 mt-0.5 truncate"></p>
                     </div>
                 </div>
 
+                <!-- Row 1: Facturación + Cobranza -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="fin-card p-5 rounded-2xl space-y-4 shadow-xl">
-                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider border-b border-[#334155] pb-2 text-center">Aging de Cartera Plastimet</h4>
-                        <div class="h-64 flex items-center justify-center"><canvas id="chartAging"></canvas></div>
+                    <div class="fin-card p-5 rounded-2xl space-y-3 shadow-xl">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Facturación</h4>
+                            <span class="text-[9px] text-slate-500 font-mono" id="cxc-fact-label">Base imponible</span>
+                        </div>
+                        <div class="h-48"><canvas id="cxc-c-fact"></canvas></div>
+                    </div>
+                    <div class="fin-card p-5 rounded-2xl space-y-3 shadow-xl">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Cobranza Gestionada</h4>
+                            <span class="text-[9px] text-slate-500 font-mono">Cobros confirmados</span>
+                        </div>
+                        <div class="h-48"><canvas id="cxc-c-cob"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Aging donut + Aging bars -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="fin-card p-5 rounded-2xl space-y-3 shadow-xl">
+                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider text-center">Estado de Cartera</h4>
+                        <div class="h-52 flex items-center justify-center"><canvas id="cxc-c-donut"></canvas></div>
+                    </div>
+                    <div class="fin-card p-5 rounded-2xl space-y-3 shadow-xl">
+                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Aging de Cartera</h4>
+                        <div class="h-52"><canvas id="cxc-c-aging"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Row 3: Tendencia YTD + Top 10 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="fin-card p-5 rounded-2xl space-y-3 shadow-xl">
+                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Tendencia Cartera / Vencida</h4>
+                        <div class="h-52"><canvas id="cxc-c-trend"></canvas></div>
                     </div>
                     <div class="fin-card rounded-2xl overflow-hidden shadow-xl flex flex-col">
-                        <div class="px-6 py-4 border-b border-[#334155] bg-[#1e293b]/50">
-                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Top 5 Clientes en Riesgo</h4>
+                        <div class="px-5 py-4 border-b border-[#334155] bg-[#1e293b]/50">
+                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Top 10 Clientes · Saldo</h4>
                         </div>
-                        <div class="overflow-x-auto flex-1 p-4">
-                            <table class="w-full text-left text-sm">
-                                <tbody id="table-top-riesgo" class="divide-y divide-[#334155]"></tbody>
+                        <div class="overflow-y-auto flex-1 custom-scrollbar">
+                            <table class="w-full text-xs">
+                                <thead><tr class="bg-[#1e293b] text-slate-400 text-[10px] uppercase border-b border-[#334155]">
+                                    <th class="px-4 py-2 text-left w-5">#</th>
+                                    <th class="px-2 py-2 text-left">Cliente</th>
+                                    <th class="px-2 py-2 text-right">Saldo</th>
+                                    <th class="px-2 py-2 text-center">Estado</th>
+                                </tr></thead>
+                                <tbody id="cxc-top10-body" class="divide-y divide-[#334155]"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+
+                <!-- Row 4: Saldo por Categoría -->
+                <div class="fin-card p-5 rounded-2xl shadow-xl">
+                    <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">Saldo por Categoría de Cliente</h4>
+                    <div class="h-48"><canvas id="cxc-c-cat"></canvas></div>
+                </div>
+
+                <!-- Empty state -->
+                <div id="cxc-empty" class="hidden fin-card p-16 rounded-2xl text-center space-y-3">
+                    <i class="fa-solid fa-file-arrow-up text-5xl text-slate-600"></i>
+                    <p class="text-slate-400 font-semibold">Sin datos de cartera</p>
+                    <p class="text-slate-500 text-sm">Carga el Excel en la sección <strong class="text-sky-400">Sincronizar</strong> para ver el dashboard.</p>
+                </div>
+
             </section>
 
             <!-- VIEW: CRM MATRIZ -->
+
             <section id="view-crm" class="space-y-6 hidden">
                 <div class="fin-card rounded-2xl overflow-hidden shadow-xl">
                     <div class="px-6 py-4 border-b border-[#334155] bg-[#1e293b]/50 flex justify-between items-center">
@@ -378,6 +470,7 @@
                     if (Array.isArray(data.cartera) && data.cartera.length > 0) {
                         cartera = data.cartera;
                         localStorage.setItem('plastimet_cartera_v31', JSON.stringify(cartera));
+                        setTimeout(() => renderCxcDashboard(), 200);
                         if (data.carteraUpdatedAt) {
                             const el = document.getElementById('cartera-cloud-fecha');
                             if (el) el.innerText = data.carteraUpdatedAt;
@@ -420,12 +513,12 @@
             document.getElementById(`nav-${view}`).classList.add('tab-active');
 
             const headers = {
-                dashboard: 'Dashboard Plastimet S.A.', crm: 'Matriz de Antigüedad por Cliente', gestionado: 'Bitácora de Gestión Activa',
+                dashboard: 'Dashboard CxC Plastimet S.A.', crm: 'Matriz de Antigüedad por Cliente', gestionado: 'Bitácora de Gestión Activa',
                 flujo: 'Pronóstico de Caja Semanal', sync: 'Sincronizar Datos Plastimet'
             };
             document.getElementById('page-title').innerText = headers[view];
 
-            if(view === 'dashboard') renderDashboard();
+            if(view === 'dashboard') renderCxcDashboard();
             if(view === 'crm') renderCRMTable();
             if(view === 'gestionado') renderGestionadoTable();
             if(view === 'flujo') renderFlujoChart();
@@ -440,31 +533,90 @@
                     const data = new Uint8Array(event.target.result);
                     const wb = XLSX.read(data, {type: 'array'});
                     let sheetName = wb.SheetNames.find(n => n.toLowerCase().includes('reporte')) || wb.SheetNames[0];
-                    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {defval: ''});
-                    
+                    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {defval: '', raw: false});
+
+                    // Helper: parse Excel date or string to ISO yyyy-mm-dd
+                    function parseDate(val) {
+                        if(!val) return '';
+                        const s = String(val).trim();
+                        // dd/mm/yyyy
+                        const m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+                        if(m1) return `${m1[3]}-${m1[2].padStart(2,'0')}-${m1[1].padStart(2,'0')}`;
+                        // yyyy-mm-dd already
+                        if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+                        return s;
+                    }
+                    function parseNum(val) {
+                        return parseFloat(String(val).replace(/[^\d.\-]/g,'')) || 0;
+                    }
+
                     let nuevasFacturas = [];
                     rows.forEach(row => {
-                        let cliente = ""; let factura = ""; let saldoFactura = 0; let dias = 0; let rango = "Corriente";
+                        let cliente="", factura="", saldoFactura=0, dias=0, rango="Corriente";
+                        let emision="", vencimiento="", baseImponible=0, totalFactura=0;
+                        let totalCobrado=0, categoria="", vendedor="";
+                        
                         for(let key in row) {
-                            let k = key.toLowerCase().trim();
-                            let val = row[key];
-                            if(val === '') continue;
-                            if(k === 'cliente' || k === 'nombre') cliente = String(val).trim();
-                            if(k === 'no. factura' || k === 'factura' || k === 'documento') factura = String(val).trim();
-                            if(k === 'saldo actual' || k === 'saldo') saldoFactura = parseFloat(String(val).replace(/,/g, '')) || 0;
-                            if(k === 'días vencidos' || k === 'dias vencidos') dias = parseInt(val) || 0;
-                            if(k === 'rango vencimiento' || k === 'rango') rango = String(val).trim();
+                            const k = key.toLowerCase().trim().replace(/\./g,'').replace(/\s+/g,' ');
+                            const val = row[key];
+                            if(val==='' || val===null || val===undefined) continue;
+
+                            // Cliente
+                            if(['cliente','nombre','razon social','razon_social','nombre cliente'].includes(k))
+                                cliente = String(val).trim();
+                            // Factura
+                            if(['no factura','factura','documento','numero factura','nro factura','no de factura','n factura'].includes(k))
+                                factura = String(val).trim();
+                            // Saldo actual
+                            if(['saldo actual','saldo','saldo_actual','saldo pendiente','saldo por cobrar'].includes(k))
+                                saldoFactura = parseNum(val);
+                            // Días vencidos
+                            if(['dias vencidos','días vencidos','dias de mora','dias mora','vencimiento dias'].includes(k))
+                                dias = parseInt(val) || 0;
+                            // Rango
+                            if(['rango vencimiento','rango','clasificacion','bucket','rango de vencimiento'].includes(k))
+                                rango = String(val).trim();
+                            // Emisión
+                            if(['fecha emision','fecha emisión','f emision','emision','fecha factura','fecha de emision','fecha_emision'].includes(k))
+                                emision = parseDate(val);
+                            // Vencimiento
+                            if(['vencimiento','fecha vencimiento','fecha de vencimiento','f vencimiento','fecha_vencimiento','fecha vcto'].includes(k))
+                                vencimiento = parseDate(val);
+                            // Base imponible
+                            if(['base imponible','base','subtotal','base imp','valor base','base_imponible','importe'].includes(k))
+                                baseImponible = parseNum(val);
+                            // Total factura
+                            if(['total factura','total','valor total','importe total','total_factura','monto total'].includes(k))
+                                totalFactura = parseNum(val);
+                            // Total cobrado
+                            if(['total cobrado','cobrado','pagado','abonado','valor cobrado','total_cobrado'].includes(k))
+                                totalCobrado = parseNum(val);
+                            // Categoría
+                            if(['categoria','categoría','tipo cliente','segmento','grupo','sector','tipo_cliente'].includes(k))
+                                categoria = String(val).trim();
+                            // Vendedor
+                            if(['vendedor','asesor','ejecutivo','representante','vendedor asignado','ejecutivo de cuenta'].includes(k))
+                                vendedor = String(val).trim();
                         }
-                        if(cliente.toLowerCase().includes('total') || cliente.toLowerCase().includes('resumen') || cliente.toLowerCase() === 'grand total') return;
-                        if(cliente && saldoFactura > 0) {
-                            let cleanId = (cliente + "_" + factura).replace(/[^a-zA-Z0-9]/g, '');
-                            nuevasFacturas.push({
-                                id: cleanId,
-                                factura: factura || "Sin Número", cliente: cliente,
-                                saldo: saldoFactura, vencido: dias > 0 ? saldoFactura : 0,
-                                dias: dias, rango: rango || "Corriente"
-                            });
-                        }
+
+                        const excluir = ['total','resumen','grand total','subtotal','totales'];
+                        if(excluir.some(x => cliente.toLowerCase().includes(x))) return;
+                        if(!cliente || saldoFactura <= 0) return;
+
+                        let cleanId = (cliente + "_" + factura).replace(/[^a-zA-Z0-9]/g, '');
+                        nuevasFacturas.push({
+                            id: cleanId,
+                            factura: factura || "Sin Número",
+                            cliente, saldo: saldoFactura,
+                            vencido: dias > 0 ? saldoFactura : 0,
+                            dias, rango: rango || "Corriente",
+                            emision, vencimiento,
+                            baseImponible: baseImponible || saldoFactura,
+                            totalFactura: totalFactura || saldoFactura,
+                            totalCobrado,
+                            categoria: categoria || "Sin categoría",
+                            vendedor
+                        });
                     });
                     
                     if(nuevasFacturas.length > 0) {
@@ -473,6 +625,7 @@
                         // Sincronizar cartera a la nube
                         const ts = new Date().toLocaleString('es-EC');
                         apiCall({ action: 'saveCartera', cartera: cartera, updatedAt: ts });
+                        renderCxcDashboard(); // Refresh dashboard on upload
                         // Actualizar info en vista sync
                         const el = document.getElementById('cartera-cloud-fecha');
                         if (el) el.innerText = ts;
@@ -588,51 +741,7 @@
             tbody.innerHTML = buffer;
         }
 
-        // ---------- DASHBOARD ----------
-        function renderDashboard() {
-            const total = cartera.reduce((s, c) => s + c.saldo, 0);
-            const vencido = cartera.reduce((s, c) => s + c.vencido, 0);
-            const corriente = total - vencido;
-            const dsoPromedio = total > 0 ? Math.round((vencido / total) * 60) + 12 : 0; 
-
-            document.getElementById('kpi-total').innerText = '$' + total.toLocaleString(undefined, {minimumFractionDigits: 2});
-            document.getElementById('kpi-vencido').innerText = '$' + vencido.toLocaleString(undefined, {minimumFractionDigits: 2});
-            document.getElementById('kpi-corriente').innerText = '$' + corriente.toLocaleString(undefined, {minimumFractionDigits: 2});
-            document.getElementById('kpi-dso').innerText = dsoPromedio + ' Días';
-
-            let rangos = {"Corriente":0, "1-30":0, "31-60":0, "61-90":0, "91-120":0, "+120":0};
-            cartera.forEach(c => {
-                if(c.dias <= 0) rangos["Corriente"] += c.saldo;
-                else if(c.dias <= 30) rangos["1-30"] += c.vencido;
-                else if(c.dias <= 60) rangos["31-60"] += c.vencido;
-                else if(c.dias <= 90) rangos["61-90"] += c.vencido;
-                else if(c.dias <= 120) rangos["91-120"] += c.vencido;
-                else rangos["+120"] += c.vencido;
-            });
-
-            const ctx = document.getElementById('chartAging').getContext('2d');
-            if(chartAgingObj) chartAgingObj.destroy();
-            chartAgingObj = new Chart(ctx, {
-                type: 'doughnut',
-                data: { labels: Object.keys(rangos), datasets: [{ data: Object.values(rangos), backgroundColor: ['#10b981', '#fbbf24', '#f97316', '#f472b6', '#fb7185', '#ef4444'], borderWidth:0 }] },
-                options: { responsive:true, maintainAspectRatio:false, plugins: { legend: { position: 'right', labels:{color:'#94a3b8', font:{size:10}} }, datalabels:{display:false} } }
-            });
-
-            let mapTop = {};
-            cartera.forEach(c => {
-                if(!mapTop[c.cliente]) mapTop[c.cliente] = { cliente: c.cliente, vencido: 0, maxDias: 0 };
-                mapTop[c.cliente].vencido += c.vencido;
-                if(c.dias > mapTop[c.cliente].maxDias) mapTop[c.cliente].maxDias = c.dias;
-            });
-
-            const tbody = document.getElementById('table-top-riesgo');
-            tbody.innerHTML = Object.values(mapTop).filter(c => c.vencido > 0).sort((a,b) => b.vencido - a.vencido).slice(0, 5).map(c => `
-                <tr class="hover:bg-[#1e293b]/50 border-b border-[#334155]/30">
-                    <td class="py-3 px-2 text-white font-semibold text-xs truncate max-w-[180px]">${c.cliente}</td>
-                    <td class="py-3 px-2 text-right font-mono text-rose-400 font-bold">$${c.vencido.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-                    <td class="py-3 px-2 text-right text-[10px] text-slate-500 uppercase">${c.maxDias} días</td>
-                </tr>`).join('');
-        }
+        // renderDashboard replaced by renderCxcDashboard below
 
         // ---------- ACCIÓN REGISTRAR GESTIÓN (CLOUD) ----------
         const modalGestion = document.getElementById('modal-gestion');
@@ -864,6 +973,270 @@
                 }
             });
         }
+
+        // Register ChartDataLabels globally
+        if(typeof ChartDataLabels !== "undefined") Chart.register(ChartDataLabels);
+
+        // ═══════════════════════════════════════════════════════
+        //  CXC ANALYTICS ENGINE
+        // ═══════════════════════════════════════════════════════
+        let cxcFilter = 'all';
+        const cxcCharts = {};
+
+        const CXC_PERIODS = {
+            all: { label:'Todo el año',  year:2026, months:null },
+            q1:  { label:'Q1 2026',      year:2026, months:[1,2,3] },
+            q2:  { label:'Q2 2026',      year:2026, months:[4,5,6] },
+            ene: { label:'Enero',        year:2026, months:[1] },
+            feb: { label:'Febrero',      year:2026, months:[2] },
+            mar: { label:'Marzo',        year:2026, months:[3] },
+            abr: { label:'Abril',        year:2026, months:[4] },
+            may: { label:'Mayo',         year:2026, months:[5] },
+        };
+
+        function setCxcFilter(key, btn) {
+            cxcFilter = key;
+            document.querySelectorAll('.filt-btn').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            renderCxcDashboard();
+        }
+
+        function cxcFmt(n, full=false) {
+            if(n===null||n===undefined||isNaN(n)) return '—';
+            if(full) return new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD',minimumFractionDigits:2}).format(n);
+            const a=Math.abs(n), s=n<0?'-':'';
+            if(a>=1e6) return s+'$'+(a/1e6).toFixed(2)+'M';
+            if(a>=1e3) return s+'$'+(a/1e3).toFixed(0)+'K';
+            return s+'$'+a.toFixed(0);
+        }
+
+        function inPeriod(dateStr, cfg) {
+            if(!dateStr) return false;
+            const d = new Date(dateStr + 'T00:00:00');
+            if(isNaN(d)) return false;
+            if(d.getFullYear() !== cfg.year) return false;
+            if(!cfg.months) return true;
+            return cfg.months.includes(d.getMonth() + 1);
+        }
+
+        function renderCxcDashboard() {
+            const hasData = cartera && cartera.length > 0;
+            document.getElementById('cxc-empty').classList.toggle('hidden', hasData);
+
+            const cfg = CXC_PERIODS[cxcFilter] || CXC_PERIODS['all'];
+            document.getElementById('cxc-corte-lbl').textContent = cfg.label + ' · ' + cartera.length + ' facturas';
+
+            if(!hasData) return;
+
+            // ── Cartera KPIs ──────────────────────────────────
+            const today = new Date();
+            let totalCartera=0, porVencer=0, vencida=0, facturado=0;
+
+            cartera.forEach(f => {
+                totalCartera += f.saldo;
+                if(f.dias > 0) vencida += f.saldo; else porVencer += f.saldo;
+                if(inPeriod(f.emision, cfg)) facturado += (f.baseImponible || f.saldo);
+            });
+
+            // Cobrado desde gestiones en período
+            const meses = cfg.months;
+            const cobradoGest = gestiones
+                .filter(g => {
+                    if(g.estado !== 'Cobrado') return false;
+                    if(!meses) return true;
+                    // fechaGestion puede ser "dd/mm/yyyy" o "yyyy-mm-dd"
+                    const parts = g.fechaGestion ? g.fechaGestion.split('/') : [];
+                    const m = parts.length===3 ? parseInt(parts[1]) : null;
+                    return meses ? meses.includes(m) : true;
+                })
+                .reduce((s,g) => s + (parseFloat(g.valorRecuperado)||0), 0);
+
+            const esperado = totalCartera + cobradoGest;
+            const eficacia = esperado > 0 ? (cobradoGest/esperado*100) : NaN;
+            const diasPeriodo = meses ? meses.length * 30 : 140;
+            const dso = facturado > 0 ? (totalCartera / facturado * diasPeriodo) : NaN;
+
+            // Set KPIs
+            const setKpi = (id, val, subId, sub) => {
+                const el = document.getElementById(id);
+                if(el) el.textContent = val;
+                const sel = document.getElementById(subId);
+                if(sel) sel.textContent = sub;
+            };
+            setKpi('kpi-cxc-fact',   cxcFmt(facturado),  'kpi-cxc-fact-sub',  cxcFmt(facturado,true));
+            setKpi('kpi-cxc-cartera',cxcFmt(totalCartera),'kpi-cxc-cartera-sub',cxcFmt(totalCartera,true));
+            setKpi('kpi-cxc-pv',     cxcFmt(porVencer),  'kpi-cxc-pv-sub',    cxcFmt(porVencer,true));
+            setKpi('kpi-cxc-venc',   cxcFmt(vencida),    'kpi-cxc-venc-sub',  cxcFmt(vencida,true));
+            setKpi('kpi-cxc-cob',    cxcFmt(cobradoGest),'kpi-cxc-cob-sub',   gestiones.filter(g=>g.estado==='Cobrado').length+' cobros');
+            setKpi('kpi-cxc-efic',   isNaN(eficacia)?'—':eficacia.toFixed(1)+'%','kpi-cxc-efic-sub','Esp: '+cxcFmt(esperado));
+            setKpi('kpi-cxc-dso',    isNaN(dso)?'—':Math.round(dso)+' d','kpi-cxc-dso-sub', diasPeriodo+' días período');
+
+            // ── Charts ────────────────────────────────────────
+            Object.keys(cxcCharts).forEach(k => { if(cxcCharts[k]) { cxcCharts[k].destroy(); delete cxcCharts[k]; }});
+
+            const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+            // 1. Facturación por mes
+            const factMensual = {};
+            cartera.forEach(f => {
+                if(!f.emision) return;
+                const d = new Date(f.emision+'T00:00:00');
+                if(isNaN(d)||d.getFullYear()!==2026) return;
+                const m = d.getMonth();
+                factMensual[m] = (factMensual[m]||0) + (f.baseImponible||f.saldo);
+            });
+            const mKeys = Object.keys(factMensual).sort((a,b)=>+a-+b);
+            cxcCharts.fact = new Chart(document.getElementById('cxc-c-fact').getContext('2d'),{
+                type:'bar',
+                plugins:[ChartDataLabels],
+                data:{ labels:mKeys.map(m=>MESES[m]), datasets:[{
+                    label:'Facturado', data:mKeys.map(m=>factMensual[m]),
+                    backgroundColor:'rgba(96,165,250,.7)', borderColor:'#93c5fd', borderWidth:1, borderRadius:5
+                }]},
+                options:{ responsive:true, maintainAspectRatio:false,
+                    plugins:{ legend:{display:false}, datalabels:{display:true,anchor:'end',align:'end',color:'#fff',font:{size:9,weight:'bold'},formatter:v=>v>0?cxcFmt(v):''},
+                    tooltip:{callbacks:{label:ctx=>cxcFmt(ctx.raw,true)}}},
+                    scales:{x:{ticks:{color:'#cbd5e1',font:{size:10}},grid:{display:false}},
+                    y:{ticks:{color:'#94a3b8',callback:v=>cxcFmt(v),font:{size:9}},grid:{color:'rgba(255,255,255,.05)'}}}}
+            });
+
+            // 2. Cobranza mensual desde gestiones
+            const cobMensual = {};
+            gestiones.filter(g=>g.estado==='Cobrado').forEach(g => {
+                const parts = g.fechaGestion ? g.fechaGestion.split('/') : [];
+                if(parts.length===3) {
+                    const m = parseInt(parts[1])-1;
+                    cobMensual[m] = (cobMensual[m]||0) + (parseFloat(g.valorRecuperado)||0);
+                }
+            });
+            const cKeys = Object.keys(cobMensual).sort((a,b)=>+a-+b);
+            cxcCharts.cob = new Chart(document.getElementById('cxc-c-cob').getContext('2d'),{
+                type:'line',
+                plugins:[ChartDataLabels],
+                data:{ labels: cKeys.length ? cKeys.map(m=>MESES[m]) : ['Sin datos'],
+                    datasets:[{ label:'Cobrado', data:cKeys.length?cKeys.map(m=>cobMensual[m]):[0],
+                    borderColor:'#34d399',backgroundColor:'rgba(52,211,153,.1)',fill:true,
+                    tension:.35,pointRadius:5,pointBackgroundColor:'#34d399',pointBorderColor:'#fff',pointBorderWidth:1.5 }]},
+                options:{ responsive:true, maintainAspectRatio:false,
+                    plugins:{ legend:{display:false}, datalabels:{display:true,anchor:'end',align:'top',color:'#fff',font:{size:9,weight:'bold'},formatter:v=>v>0?cxcFmt(v):''},
+                    tooltip:{callbacks:{label:ctx=>cxcFmt(ctx.raw,true)}}},
+                    scales:{x:{ticks:{color:'#cbd5e1',font:{size:10}},grid:{display:false}},
+                    y:{ticks:{color:'#94a3b8',callback:v=>cxcFmt(v),font:{size:9}},grid:{color:'rgba(255,255,255,.05)'},beginAtZero:true}}}
+            });
+
+            // 3. Donut estado cartera
+            cxcCharts.donut = new Chart(document.getElementById('cxc-c-donut').getContext('2d'),{
+                type:'doughnut', plugins:[ChartDataLabels],
+                data:{ labels:['Por Vencer','Vencida'],
+                    datasets:[{data:[Math.max(0,porVencer),Math.max(0,vencida)],
+                    backgroundColor:['#34d399','#f87171'],borderColor:'#111827',borderWidth:3}]},
+                options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
+                    plugins:{ legend:{position:'bottom',labels:{color:'#fff',font:{size:11},padding:12}},
+                    datalabels:{color:'#fff',formatter:(v,ctx)=>{const t=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);return t>0?(v/t*100).toFixed(1)+'%':'';},font:{weight:'bold',size:12}},
+                    tooltip:{callbacks:{label:ctx=>ctx.label+': '+cxcFmt(ctx.raw,true)}}}}
+            });
+
+            // 4. Aging bars
+            const ag = {b30:0,b60:0,b90:0,b120:0,b120p:0};
+            cartera.forEach(f => {
+                if(f.dias<=0) return;
+                if(f.dias<=30) ag.b30+=f.saldo; else if(f.dias<=60) ag.b60+=f.saldo;
+                else if(f.dias<=90) ag.b90+=f.saldo; else if(f.dias<=120) ag.b120+=f.saldo;
+                else ag.b120p+=f.saldo;
+            });
+            cxcCharts.aging = new Chart(document.getElementById('cxc-c-aging').getContext('2d'),{
+                type:'bar', plugins:[ChartDataLabels],
+                data:{ labels:['+120 días','91-120 días','61-90 días','31-60 días','1-30 días'],
+                    datasets:[{data:[ag.b120p,ag.b120,ag.b90,ag.b60,ag.b30],
+                    backgroundColor:['#fca5a5','#fb923c','#fbbf24','#86efac','#6ee7b7'],borderRadius:4}]},
+                options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+                    plugins:{ legend:{display:false}, datalabels:{display:true,anchor:'end',align:'end',color:'#fff',font:{size:10,weight:'bold'},formatter:v=>v>0?cxcFmt(v):''},
+                    tooltip:{callbacks:{label:ctx=>cxcFmt(ctx.raw,true)}}},
+                    scales:{x:{ticks:{color:'#94a3b8',callback:v=>cxcFmt(v),font:{size:9}},grid:{color:'rgba(255,255,255,.05)'}},
+                    y:{ticks:{color:'#fff',font:{size:11}},grid:{display:false}}}}
+            });
+
+            // 5. Tendencia YTD - cartera y vencida por mes (estática sobre cartera actual)
+            const mesesYtd = ['Ene','Feb','Mar','Abr','May'];
+            const cartMonths = [1,2,3,4,5].map(m => {
+                return cartera.filter(f => {
+                    if(!f.emision) return false;
+                    const d = new Date(f.emision+'T00:00:00');
+                    return !isNaN(d) && d.getFullYear()===2026 && d.getMonth()+1<=m;
+                }).reduce((s,f)=>s+f.saldo,0);
+            });
+            const vencMonths = [1,2,3,4,5].map(m => {
+                return cartera.filter(f => {
+                    if(!f.emision) return false;
+                    const d = new Date(f.emision+'T00:00:00');
+                    return !isNaN(d) && d.getFullYear()===2026 && d.getMonth()+1<=m && f.dias>0;
+                }).reduce((s,f)=>s+f.saldo,0);
+            });
+            cxcCharts.trend = new Chart(document.getElementById('cxc-c-trend').getContext('2d'),{
+                type:'bar',
+                data:{ labels:mesesYtd,
+                    datasets:[
+                        {label:'Cartera Acum.',data:cartMonths,backgroundColor:'rgba(96,165,250,.45)',borderColor:'#60a5fa',borderWidth:1,borderRadius:4,order:2},
+                        {label:'Vencida',data:vencMonths,type:'line',borderColor:'#f87171',backgroundColor:'rgba(248,113,113,.1)',fill:true,tension:.3,
+                        pointRadius:5,pointBackgroundColor:'#f87171',pointBorderColor:'#fff',pointBorderWidth:1.5,order:1}
+                    ]},
+                options:{ responsive:true, maintainAspectRatio:false,
+                    plugins:{ legend:{position:'top',labels:{color:'#94a3b8',font:{size:10},padding:10,boxWidth:10}},
+                    datalabels:{display:false},
+                    tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+cxcFmt(ctx.raw,true)}}},
+                    scales:{x:{ticks:{color:'#cbd5e1',font:{size:11}},grid:{display:false}},
+                    y:{ticks:{color:'#94a3b8',callback:v=>cxcFmt(v),font:{size:9}},grid:{color:'rgba(255,255,255,.05)'}}}}
+            });
+
+            // 6. Top 10
+            const clientMap = {};
+            cartera.forEach(f => {
+                if(!clientMap[f.cliente]) clientMap[f.cliente] = {saldo:0,facturas:0,maxDias:0};
+                clientMap[f.cliente].saldo += f.saldo;
+                clientMap[f.cliente].facturas++;
+                if(f.dias>0) clientMap[f.cliente].maxDias = Math.max(clientMap[f.cliente].maxDias, f.dias);
+            });
+            const top10 = Object.entries(clientMap).map(([k,v])=>({cliente:k,...v}))
+                .filter(x=>x.saldo>0.01).sort((a,b)=>b.saldo-a.saldo).slice(0,10);
+
+            const tbody = document.getElementById('cxc-top10-body');
+            tbody.innerHTML = top10.map((c,i) => {
+                const matchG = gestiones.find(g => g.cliente === c.cliente);
+                let badge = '<span class="text-[9px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">Pendiente</span>';
+                if(matchG) {
+                    if(matchG.estado==='Cobrado') badge='<span class="text-[9px] bg-emerald-600 text-white px-1.5 py-0.5 rounded">Cobrado</span>';
+                    else if(matchG.estado==='Pendiente') badge='<span class="text-[9px] bg-indigo-600 text-white px-1.5 py-0.5 rounded">Gestionado</span>';
+                    else badge='<span class="text-[9px] bg-rose-600 text-white px-1.5 py-0.5 rounded">P.Rota</span>';
+                }
+                const dias = c.maxDias > 0 ? `<span class="text-rose-400">${c.maxDias}d</span>` : '<span class="text-emerald-400">—</span>';
+                return `<tr class="hover:bg-[#1e293b]/50 border-b border-[#334155]/40">
+                    <td class="px-4 py-2 text-slate-400">${i+1}</td>
+                    <td class="px-2 py-2 text-white text-[11px] max-w-[150px] truncate" title="${c.cliente}">${c.cliente}</td>
+                    <td class="px-2 py-2 text-right font-mono text-amber-400 font-bold">${cxcFmt(c.saldo,true)}</td>
+                    <td class="px-2 py-2 text-center">${badge}</td>
+                </tr>`;
+            }).join('');
+
+            // 7. Categorías
+            const catMap = {};
+            cartera.forEach(f => {
+                const cat = f.categoria || 'Sin categoría';
+                catMap[cat] = (catMap[cat]||0) + f.saldo;
+            });
+            const catSorted = Object.entries(catMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+            cxcCharts.cat = new Chart(document.getElementById('cxc-c-cat').getContext('2d'),{
+                type:'bar', plugins:[ChartDataLabels],
+                data:{ labels:catSorted.map(x=>x[0]),
+                    datasets:[{data:catSorted.map(x=>x[1]),
+                    backgroundColor:'rgba(167,139,250,.7)',borderColor:'#c4b5fd',borderWidth:1,borderRadius:4}]},
+                options:{ responsive:true, maintainAspectRatio:false,
+                    plugins:{ legend:{display:false}, datalabels:{display:true,anchor:'end',align:'end',color:'#fff',font:{size:10,weight:'bold'},formatter:v=>v>0?cxcFmt(v):''},
+                    tooltip:{callbacks:{label:ctx=>cxcFmt(ctx.raw,true)}}},
+                    scales:{x:{ticks:{color:'#cbd5e1',font:{size:10}},grid:{display:false}},
+                    y:{ticks:{color:'#94a3b8',callback:v=>cxcFmt(v),font:{size:9}},grid:{color:'rgba(255,255,255,.05)'}}}}
+            });
+        }
+
     </script>
 </body>
 </html>
