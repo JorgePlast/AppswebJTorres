@@ -53,8 +53,8 @@
             
             <nav class="mt-6 px-2 space-y-1 whitespace-nowrap">
                 <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-3 py-3 rounded-xl text-xs font-medium text-slate-400 hover:bg-[#1e293b] hover:text-white transition-all tab-active">
-                    <i class="fa-solid fa-chart-line text-base w-5 text-center text-sky-400 flex-shrink-0"></i> 
-                    <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Dashboard CxC</span>
+                    <i class="fa-solid fa-gauge-high text-base w-5 text-center text-sky-400 flex-shrink-0"></i> 
+                    <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Dashboard</span>
                 </button>
                 <button onclick="switchView('crm')" id="nav-crm" class="w-full flex items-center gap-4 px-3 py-3 rounded-xl text-xs font-medium text-slate-400 hover:bg-[#1e293b] hover:text-white transition-all">
                     <i class="fa-solid fa-table-list text-base w-5 text-center flex-shrink-0"></i> 
@@ -97,138 +97,88 @@
         <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-[#0b0f19]">
 
             <!-- VIEW: DASHBOARD CXC -->
-            <section id="view-dashboard" class="space-y-6">
+            <section id="view-dashboard" class="space-y-5">
 
-                <!-- Filtros de período -->
-                <div class="fin-card p-4 rounded-2xl flex flex-wrap items-center gap-2">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Período:</span>
-                    <button class="filt-btn active" data-f="all" onclick="setCxcFilter('all',this)">Todo el año</button>
-                    <button class="filt-btn" data-f="q1" onclick="setCxcFilter('q1',this)">Q1</button>
-                    <button class="filt-btn" data-f="q2" onclick="setCxcFilter('q2',this)">Q2</button>
-                    <button class="filt-btn" data-f="ene" onclick="setCxcFilter('ene',this)">Ene</button>
-                    <button class="filt-btn" data-f="feb" onclick="setCxcFilter('feb',this)">Feb</button>
-                    <button class="filt-btn" data-f="mar" onclick="setCxcFilter('mar',this)">Mar</button>
-                    <button class="filt-btn" data-f="abr" onclick="setCxcFilter('abr',this)">Abr</button>
-                    <button class="filt-btn" data-f="may" onclick="setCxcFilter('may',this)">May</button>
-                    <div class="ml-auto text-[10px] text-slate-500 font-mono" id="cxc-corte-lbl"></div>
-                </div>
-
-                <!-- KPI Cards - 7 tarjetas (grandes) -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-                    <div class="fin-card px-4 pt-4 pb-3 rounded-2xl border-l-4 border-l-sky-500 flex flex-col justify-between min-h-[100px]">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Facturado</span>
-                        <h3 id="kpi-cxc-fact" class="text-2xl font-black text-sky-400 font-mono kpi-val my-1">$0</h3>
-                        <p id="kpi-cxc-fact-sub" class="text-[10px] font-semibold text-sky-300/70 truncate"></p>
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <div class="fin-card px-4 pt-4 pb-3 rounded-2xl border-l-4 border-l-emerald-500 flex flex-col justify-between min-h-[100px]">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Cobrado</span>
+                        <h3 id="dg-kpi-cobrado" class="text-2xl font-black text-emerald-400 font-mono my-1">$0</h3>
+                        <p id="dg-kpi-cobrado-sub" class="text-[10px] text-emerald-300/70 truncate font-semibold"></p>
                     </div>
                     <div class="fin-card px-4 pt-4 pb-3 rounded-2xl border-l-4 border-l-amber-400 flex flex-col justify-between min-h-[100px]">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Cartera Total</span>
-                        <h3 id="kpi-cxc-cartera" class="text-2xl font-black text-amber-400 font-mono kpi-val my-1">$0</h3>
-                        <p id="kpi-cxc-cartera-sub" class="text-[10px] font-semibold text-amber-300/70 truncate"></p>
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Promesas Activas</span>
+                        <h3 id="dg-kpi-promesas" class="text-2xl font-black text-amber-400 font-mono my-1">$0</h3>
+                        <p id="dg-kpi-promesas-sub" class="text-[10px] text-amber-300/70 truncate font-semibold"></p>
                     </div>
-                    <div class="fin-card px-4 pt-4 pb-3 rounded-2xl border-l-4 border-l-emerald-400 flex flex-col justify-between min-h-[100px]">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Por Vencer</span>
-                        <h3 id="kpi-cxc-pv" class="text-2xl font-black text-emerald-400 font-mono kpi-val my-1">$0</h3>
-                        <p id="kpi-cxc-pv-sub" class="text-[10px] font-semibold text-emerald-300/70 truncate"></p>
+                    <div class="fin-card px-4 pt-4 pb-3 rounded-2xl border-l-4 border-l-sky-400 flex flex-col justify-between min-h-[100px]">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Seguimientos</span>
+                        <h3 id="dg-kpi-seguim" class="text-2xl font-black text-sky-400 font-mono my-1">0</h3>
+                        <p id="dg-kpi-seguim-sub" class="text-[10px] text-sky-300/70 truncate font-semibold"></p>
                     </div>
                     <div class="fin-card px-4 pt-4 pb-3 rounded-2xl border-l-4 border-l-rose-500 flex flex-col justify-between min-h-[100px]">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Vencida</span>
-                        <h3 id="kpi-cxc-venc" class="text-2xl font-black text-rose-400 font-mono kpi-val my-1">$0</h3>
-                        <p id="kpi-cxc-venc-sub" class="text-[10px] font-semibold text-rose-300/70 truncate"></p>
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Promesas Rotas</span>
+                        <h3 id="dg-kpi-rotas" class="text-2xl font-black text-rose-400 font-mono my-1">0</h3>
+                        <p id="dg-kpi-rotas-sub" class="text-[10px] text-rose-300/70 truncate font-semibold"></p>
                     </div>
                     <div class="fin-card px-4 pt-4 pb-3 rounded-2xl border-l-4 border-l-violet-500 flex flex-col justify-between min-h-[100px]">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Cobrado</span>
-                        <h3 id="kpi-cxc-cob" class="text-2xl font-black text-violet-400 font-mono kpi-val my-1">$0</h3>
-                        <p id="kpi-cxc-cob-sub" class="text-[10px] font-semibold text-violet-300/70 truncate"></p>
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Total Gestionado</span>
+                        <h3 id="dg-kpi-total" class="text-2xl font-black text-violet-400 font-mono my-1">$0</h3>
+                        <p id="dg-kpi-total-sub" class="text-[10px] text-violet-300/70 truncate font-semibold"></p>
                     </div>
                     <div class="fin-card px-4 pt-4 pb-3 rounded-2xl border-l-4 border-l-cyan-400 flex flex-col justify-between min-h-[100px]">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Eficacia</span>
-                        <h3 id="kpi-cxc-efic" class="text-2xl font-black text-cyan-400 font-mono kpi-val my-1">—</h3>
-                        <p id="kpi-cxc-efic-sub" class="text-[10px] font-semibold text-cyan-300/70 truncate"></p>
-                    </div>
-                    <div class="fin-card px-4 pt-4 pb-3 rounded-2xl border-l-4 border-l-blue-400 flex flex-col justify-between min-h-[100px]">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-tight">DSO</span>
-                        <h3 id="kpi-cxc-dso" class="text-2xl font-black text-blue-400 font-mono kpi-val my-1">— d</h3>
-                        <p id="kpi-cxc-dso-sub" class="text-[10px] font-semibold text-blue-300/70 truncate"></p>
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Efectividad</span>
+                        <h3 id="dg-kpi-efect" class="text-2xl font-black text-cyan-400 font-mono my-1">—</h3>
+                        <p id="dg-kpi-efect-sub" class="text-[10px] text-cyan-300/70 truncate font-semibold"></p>
                     </div>
                 </div>
 
-                <!-- Row 1: Facturación + Cobranza -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="fin-card p-5 rounded-2xl space-y-3 shadow-xl">
-                        <div class="flex items-center justify-between">
-                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Facturación</h4>
-                            <span class="text-[9px] text-slate-500 font-mono" id="cxc-fact-label">Base imponible</span>
+                <!-- Row 1: Donut + Cobranza mensual -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    <div class="fin-card p-5 rounded-2xl shadow-xl">
+                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 text-center">Estado de Gestiones</h4>
+                        <div class="h-56 flex items-center justify-center"><canvas id="dg-c-donut"></canvas></div>
+                    </div>
+                    <div class="fin-card p-5 rounded-2xl shadow-xl">
+                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">Cobranza Mensual</h4>
+                        <div class="h-56"><canvas id="dg-c-cob"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Próximas promesas + Tabla gestiones activas -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    <div class="fin-card p-5 rounded-2xl shadow-xl">
+                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">Próximas Promesas · 30 días</h4>
+                        <div class="h-56"><canvas id="dg-c-proximas"></canvas></div>
+                    </div>
+                    <div class="fin-card rounded-2xl overflow-hidden shadow-xl flex flex-col">
+                        <div class="px-5 py-3 border-b border-[#334155] bg-[#1e293b]/50">
+                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Gestiones Activas · Resumen por Cliente</h4>
                         </div>
-                        <div class="h-48"><canvas id="cxc-c-fact"></canvas></div>
-                    </div>
-                    <div class="fin-card p-5 rounded-2xl space-y-3 shadow-xl">
-                        <div class="flex items-center justify-between">
-                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Cobranza Gestionada</h4>
-                            <div class="flex gap-1">
-                                <button id="cob-btn-sem" class="filt-btn" onclick="setCobMode('sem')">Sem</button>
-                                <button id="cob-btn-mes" class="filt-btn active" onclick="setCobMode('mes')">Mes</button>
-                            </div>
-                        </div>
-                        <div class="h-48"><canvas id="cxc-c-cob"></canvas></div>
-                    </div>
-                </div>
-
-                <!-- Row 2: Aging donut + Aging bars -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="fin-card p-5 rounded-2xl space-y-3 shadow-xl">
-                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider text-center">Estado de Cartera</h4>
-                        <div class="h-52 flex items-center justify-center"><canvas id="cxc-c-donut"></canvas></div>
-                    </div>
-                    <div class="fin-card p-5 rounded-2xl space-y-3 shadow-xl">
-                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Aging de Cartera</h4>
-                        <div class="h-52"><canvas id="cxc-c-aging"></canvas></div>
-                    </div>
-                </div>
-
-                <!-- Row 3: Tendencia + KPI 5-6 -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="fin-card p-5 rounded-2xl space-y-3 shadow-xl">
-                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Tendencia Cartera / Vencida</h4>
-                        <div class="h-52"><canvas id="cxc-c-trend"></canvas></div>
-                    </div>
-                    <div class="fin-card p-5 rounded-2xl shadow-xl flex flex-col gap-3">
-                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">KPI 5-6 · Desglose Recuperación</h4>
-                        <div class="flex gap-3 items-start">
-                            <div class="w-36 flex-shrink-0" style="height:130px"><canvas id="cxc-gauge"></canvas></div>
-                            <div id="cxc-desglose-table" class="flex-1 overflow-auto text-xs"></div>
+                        <div class="overflow-y-auto flex-1 custom-scrollbar" style="max-height:240px">
+                            <table class="w-full text-xs">
+                                <thead><tr class="bg-[#1e293b] text-slate-400 text-[9px] uppercase border-b border-[#334155] sticky top-0">
+                                    <th class="px-3 py-2 text-left">Cliente</th>
+                                    <th class="px-2 py-2 text-right">Monto</th>
+                                    <th class="px-2 py-2 text-center">Estado</th>
+                                    <th class="px-2 py-2 text-center">Fecha</th>
+                                </tr></thead>
+                                <tbody id="dg-tabla-activas" class="divide-y divide-[#334155]/40"></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-
-                <!-- Row 4: Top 10 full width -->
-                <div class="fin-card rounded-2xl overflow-hidden shadow-xl">
-                    <div class="px-5 py-4 border-b border-[#334155] bg-[#1e293b]/50">
-                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Top 10 Clientes · Saldo</h4>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-xs">
-                            <thead><tr class="bg-[#1e293b] text-slate-400 text-[10px] uppercase border-b border-[#334155]">
-                                <th class="px-4 py-2 text-left w-5">#</th>
-                                <th class="px-2 py-2 text-left">Cliente</th>
-                                <th class="px-2 py-2 text-right">Saldo</th>
-                                <th class="px-2 py-2 text-center">Estado</th>
-                            </tr></thead>
-                            <tbody id="cxc-top10-body" class="divide-y divide-[#334155]/40"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-
 
                 <!-- Empty state -->
-                <div id="cxc-empty" class="hidden fin-card p-16 rounded-2xl text-center space-y-3">
-                    <i class="fa-solid fa-file-arrow-up text-5xl text-slate-600"></i>
-                    <p class="text-slate-400 font-semibold">Sin datos de cartera</p>
-                    <p class="text-slate-500 text-sm">Carga el Excel en la sección <strong class="text-sky-400">Sincronizar</strong> para ver el dashboard.</p>
+                <div id="dg-empty" class="hidden fin-card p-16 rounded-2xl text-center space-y-3">
+                    <i class="fa-solid fa-clipboard-list text-5xl text-slate-600"></i>
+                    <p class="text-slate-400 font-semibold">Sin gestiones registradas</p>
+                    <p class="text-slate-500 text-sm">Registra promesas de pago o seguimientos desde la <strong class="text-sky-400">Matriz de Cobranza</strong>.</p>
                 </div>
 
             </section>
 
+            <!-- VIEW: CRM MATRIZ -->
             <!-- VIEW: CRM MATRIZ -->
 
             <section id="view-crm" class="space-y-6 hidden">
@@ -690,7 +640,7 @@
                     }
 
                     // ── Parsear filas del Reporte ────────────────
-                    const LAST_WEEK = 21;
+                    const LAST_WEEK = 26; // leer hasta semana 26 max (cubre todo el año)
                     let nuevasFacturas = [];
                     const excluir = ['total','resumen','grand total','subtotal','totales'];
 
@@ -713,7 +663,7 @@
                         const vendedor  = String(r['vendedor']||'').trim();
                         const categ     = String(r['cliente categoria']||r['categoria']||'Sin categoría').trim();
 
-                        // Extraer semanas 1..21
+                        // Extraer semanas 1..LAST_WEEK (dinámico)
                         const semanas = [];
                         for(let i=1; i<=LAST_WEEK; i++) {
                             semanas.push(pNum(r[`semana ${i}`]) || 0);
@@ -740,7 +690,20 @@
                         });
                     });
 
-                    console.log(`Parser: ${nuevasFacturas.length} facturas. Muestra:`, nuevasFacturas[0]);
+                    // ── Detectar cutoff real del Excel ──────────────
+                    const WEEK_BASE = new Date(2025,11,29); // sem 1 = 29-dic-2025
+                    let lastWeekDetected = 0;
+                    nuevasFacturas.forEach(f => {
+                        if(!f.semanas) return;
+                        for(let i = f.semanas.length - 1; i >= 0; i--) {
+                            if(f.semanas[i] > 0 && i+1 > lastWeekDetected) { lastWeekDetected = i+1; break; }
+                        }
+                    });
+                    if(lastWeekDetected === 0) lastWeekDetected = 21; // fallback
+                    // asOfDate = domingo al final de esa semana
+                    const asOfDetected = new Date(WEEK_BASE.getTime() + (lastWeekDetected-1)*7*864e5 + 6*864e5);
+                    window.cxcCutoff = { lastWeek: lastWeekDetected, asOfDate: asOfDetected };
+                    console.log(`Parser: ${nuevasFacturas.length} facturas. Corte: sem ${lastWeekDetected} → ${asOfDetected.toDateString()}`);
 
                     if(nuevasFacturas.length > 0) {
                         cartera = nuevasFacturas;
@@ -1406,7 +1369,7 @@
             // Clasificar gestiones del mes
             const cobrados   = gestiones.filter(g => g.estado==='Cobrado'    && normFechaG(g.fechaPromesa)?.startsWith(mesFiltro));
             const pendientes = gestiones.filter(g => g.estado==='Pendiente'  && normFechaG(g.fechaPromesa)?.startsWith(mesFiltro));
-            const seguims    = gestiones.filter(g => g.estado==='Seguimiento'&& normFechaG(g.fechaSeguimiento)?.startsWith(mesFiltro));
+            const seguims    = gestiones.filter(g => g.estado==='Seguimiento'); // todos los activos
 
             const totalCobrado    = cobrados.reduce((s,g) => s + (Number(g.valorRecuperado)||0), 0);
             const totalPendiente  = pendientes.reduce((s,g) => s + (Number(g.saldoPendiente)||0), 0);
@@ -1420,7 +1383,7 @@
             // Sección cobrados
             let secCob = cobrados.length
                 ? cobrados.sort((a,b)=>a.fechaPromesa.localeCompare(b.fechaPromesa))
-                    .map(g => `  • ${g.cliente.padEnd(32,' ')} | Fact: ${(g.factura||'—').padEnd(12)} | ${fmt(g.valorRecuperado)} | ${g.fechaPromesa}`)
+                    .map(g => `  • ${g.cliente.padEnd(32,' ')} | Fact: ${(g.factura||'—').padEnd(12)} | ${fmt(g.valorRecuperado)} | ${fmtGestFecha(g.fechaPromesa)}`)
                     .join('\n')
                 : '  (sin cobros registrados en el mes)';
 
@@ -1442,9 +1405,19 @@
 
             // Sección seguimientos
             let secSeg = '';
-            SEM_STARTS.forEach(([ini,fin], wi) => {
+            // Seguimientos agrupados por fecha (cualquier mes)
+            const segOrdenados = [...seguims].sort((a,b)=>normFechaG(a.fechaSeguimiento||'').localeCompare(normFechaG(b.fechaSeguimiento||'')));
+            // Mostrar todos sin filtro de semana de mes
+            if(segOrdenados.length) {
+                segOrdenados.forEach(g => {
+                    const fact = cartera.find(x => x.id === g.facturaId);
+                    secSeg += `  • ${g.cliente.padEnd(32,' ')} | Fact: ${(g.factura||'—').padEnd(12)} | Saldo: ${fmt(fact?.saldo||0)} | Seg: ${fmtGestFecha(g.fechaSeguimiento)}
+`;
+                });
+            }
+            if(false) SEM_STARTS.forEach(([ini,fin], wi) => {
                 const sem = seguims.filter(g => {
-                    const d = parseInt(g.fechaSeguimiento.split('-')[2]);
+                    const d = parseInt(normFechaG(g.fechaSeguimiento||'0000-00-00').split('-')[2]);
                     return d >= ini && d <= fin;
                 });
                 if(!sem.length) return;
@@ -1517,20 +1490,26 @@ ${sepLine}
             const hoy = new Date().toLocaleDateString('es-EC', {day:'2-digit',month:'long',year:'numeric'});
 
             // Regenerar datos para tabla HTML
-            const cobrados   = gestiones.filter(g => g.estado==='Cobrado'    && normFechaG(g.fechaPromesa)?.startsWith(mesFiltro));
-            const pendientes = gestiones.filter(g => g.estado==='Pendiente'  && normFechaG(g.fechaPromesa)?.startsWith(mesFiltro));
-            const seguims    = gestiones.filter(g => g.estado==='Seguimiento'&& normFechaG(g.fechaSeguimiento)?.startsWith(mesFiltro));
+            const cobrados   = gestiones.filter(g => g.estado==='Cobrado'   && normFechaG(g.fechaPromesa)?.startsWith(mesFiltro));
+            const pendientes = gestiones.filter(g => g.estado==='Pendiente' && normFechaG(g.fechaPromesa)?.startsWith(mesFiltro));
+            const seguims    = gestiones.filter(g => g.estado==='Seguimiento'); // todos los activos
             const fmt = n => '$' + Number(n).toLocaleString('es-EC', {minimumFractionDigits:2, maximumFractionDigits:2});
+            const fmtF = val => {
+                if(!val) return '—'; const s=String(val).trim();
+                if(s.includes('T')){const d=new Date(s);if(!isNaN(d))return d.getUTCDate()+'/'+(d.getUTCMonth()+1)+'/'+d.getUTCFullYear();}
+                const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return parseInt(m[3])+'/'+parseInt(m[2])+'/'+m[1];
+                return s;
+            };
             const totalCobrado   = cobrados.reduce((s,g)=>s+(Number(g.valorRecuperado)||0),0);
             const totalPendiente = pendientes.reduce((s,g)=>s+(Number(g.saldoPendiente)||0),0);
             const totalSeguim    = seguims.reduce((s,g)=>{const f=cartera.find(x=>x.id===g.facturaId);return s+(f?f.saldo||0:0);},0);
 
-            const filasCob = cobrados.sort((a,b)=>a.fechaPromesa.localeCompare(b.fechaPromesa))
-                .map(g=>`<tr><td>${g.cliente}</td><td>${g.factura||'—'}</td><td class="num">${fmt(g.valorRecuperado)}</td><td>${g.fechaPromesa}</td></tr>`).join('');
-            const filasPend = pendientes.sort((a,b)=>a.fechaPromesa.localeCompare(b.fechaPromesa))
-                .map(g=>`<tr><td>${g.cliente}</td><td>${g.factura||'—'}</td><td class="num">${fmt(g.saldoPendiente)}</td><td>${g.fechaPromesa}</td></tr>`).join('');
-            const filasSeg = seguims.sort((a,b)=>a.fechaSeguimiento.localeCompare(b.fechaSeguimiento))
-                .map(g=>{const f=cartera.find(x=>x.id===g.facturaId);return`<tr><td>${g.cliente}</td><td>${g.factura||'—'}</td><td class="num">${fmt(f?.saldo||0)}</td><td>${g.fechaSeguimiento}</td></tr>`;}).join('');
+            const filasCob = cobrados.sort((a,b)=>normFechaG(a.fechaPromesa).localeCompare(normFechaG(b.fechaPromesa)))
+                .map(g=>`<tr><td>${g.cliente}</td><td>${g.factura||'—'}</td><td class="num">${fmt(g.valorRecuperado)}</td><td>${fmtF(g.fechaPromesa)}</td></tr>`).join('');
+            const filasPend = pendientes.sort((a,b)=>normFechaG(a.fechaPromesa).localeCompare(normFechaG(b.fechaPromesa)))
+                .map(g=>`<tr><td>${g.cliente}</td><td>${g.factura||'—'}</td><td class="num">${fmt(g.saldoPendiente)}</td><td>${fmtF(g.fechaPromesa)}</td></tr>`).join('');
+            const filasSeg = seguims.sort((a,b)=>normFechaG(a.fechaSeguimiento||'').localeCompare(normFechaG(b.fechaSeguimiento||'')))
+                .map(g=>{const f=cartera.find(x=>x.id===g.facturaId);return`<tr><td>${g.cliente}</td><td>${g.factura||'—'}</td><td class="num">${fmt(f?.saldo||0)}</td><td>${fmtF(g.fechaSeguimiento)}</td></tr>`;}).join('');
 
             const tblHdr = `<tr class="th"><th>Cliente</th><th>Factura</th><th>Monto</th><th>Fecha</th></tr>`;
 
@@ -1620,410 +1599,144 @@ ${filasSeg || '<tr><td colspan="4" class="empty">Sin seguimientos agendados en e
         // Register ChartDataLabels globally
         if(typeof ChartDataLabels !== "undefined") Chart.register(ChartDataLabels);
 
-        // ═══════════════════════════════════════════════════════════════════
-        //  CXC ANALYTICS ENGINE  —  lógica fiel al dashboard original
-        // ═══════════════════════════════════════════════════════════════════
-
-        // Register ChartDataLabels globally
+        // ══════════════════════════════════════════════════════
+        //  DASHBOARD GESTIÓN DE COBRANZAS
+        // ══════════════════════════════════════════════════════
         if(typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+        const dgCharts = {};
+        const MESES_DG = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
-        let cxcFilter  = 'all';
-        let cxcCobMode = 'mes';   // 'sem' | 'mes'
-        const SALDO_INI_2026 = 712228.15;  // Cierre 2025 — fijo
-        const cxcCharts = {};
-        const MESES_CXC = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-
-        // ── Tabla de períodos (idéntica al dashboard original) ────────────
-        const CXC_PERIODS = {
-            all:{ label:'Todo el año', eStart:new Date(2026,0,1), eEnd:new Date(2026,4,19),
-                  sems:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21],
-                  asOfDate:new Date(2026,4,19), lastWeek:21, startSaldoIni:SALDO_INI_2026, diasPeriodo:139 },
-            q1: { label:'Q1 2026', eStart:new Date(2026,0,1), eEnd:new Date(2026,2,31),
-                  sems:[1,2,3,4,5,6,7,8,9,10,11,12,13],
-                  asOfDate:new Date(2026,2,31), lastWeek:13, startSaldoIni:SALDO_INI_2026, diasPeriodo:90 },
-            q2: { label:'Q2 2026', eStart:new Date(2026,3,1), eEnd:new Date(2026,4,19),
-                  sems:[14,15,16,17,18,19,20,21],
-                  asOfDate:new Date(2026,4,19), lastWeek:21,
-                  startAsOfDate:new Date(2026,2,31), startLastWeek:13, diasPeriodo:49 },
-            ene:{ label:'Enero 2026', eStart:new Date(2026,0,1), eEnd:new Date(2026,0,31),
-                  sems:[1,2,3,4], asOfDate:new Date(2026,0,31), lastWeek:4,
-                  startSaldoIni:SALDO_INI_2026, diasPeriodo:31 },
-            feb:{ label:'Febrero 2026', eStart:new Date(2026,1,1), eEnd:new Date(2026,1,28),
-                  sems:[5,6,7,8], asOfDate:new Date(2026,1,28), lastWeek:8,
-                  startAsOfDate:new Date(2026,0,31), startLastWeek:4, diasPeriodo:28 },
-            mar:{ label:'Marzo 2026', eStart:new Date(2026,2,1), eEnd:new Date(2026,2,31),
-                  sems:[9,10,11,12,13], asOfDate:new Date(2026,2,31), lastWeek:13,
-                  startAsOfDate:new Date(2026,1,28), startLastWeek:8, diasPeriodo:31 },
-            abr:{ label:'Abril 2026', eStart:new Date(2026,3,1), eEnd:new Date(2026,3,30),
-                  sems:[14,15,16,17,18], asOfDate:new Date(2026,3,30), lastWeek:18,
-                  startAsOfDate:new Date(2026,2,31), startLastWeek:13, diasPeriodo:30 },
-            may:{ label:'Mayo 2026', eStart:new Date(2026,4,1), eEnd:new Date(2026,4,19),
-                  sems:[19,20,21], asOfDate:new Date(2026,4,19), lastWeek:21,
-                  startAsOfDate:new Date(2026,3,30), startLastWeek:18, diasPeriodo:19 },
-        };
-
-        // ── Helpers ─────────────────────────────────────────────────────
-        function cxcFmt(n, full=false){
+        function dgFmt(n, full=false) {
             if(n===null||n===undefined||isNaN(n)) return '—';
             if(full) return new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD',minimumFractionDigits:2}).format(n);
-            const a=Math.abs(n),s=n<0?'-':'';
+            const a=Math.abs(n), s=n<0?'-':'';
             if(a>=1e6) return s+'$'+(a/1e6).toFixed(2)+'M';
             if(a>=1e3) return s+'$'+(a/1e3).toFixed(0)+'K';
             return s+'$'+a.toFixed(0);
         }
 
-        // balance de una factura al corte de un período dado
-        function cxcBalAt(f, asOfDate, lastWeek){
-            const em = f.emision ? new Date(f.emision+'T00:00:00') : null;
-            if(!em || em > asOfDate) return 0;
-            let extra = 0;
-            if(f.semanas){ for(let i=lastWeek; i<21; i++) extra += (f.semanas[i]||0); }
-            return (f.saldo||0) + extra;
-        }
+        function renderCxcDashboard() {   // mantiene el nombre para compatibilidad con switchView
+            const hayGestiones = gestiones && gestiones.length > 0;
+            document.getElementById('dg-empty').classList.toggle('hidden', hayGestiones);
+            if(!hayGestiones) return;
 
-        // saldo inicial del período (SI CxC)
-        function cxcSaldoIni(cfg){
-            if(cfg.startSaldoIni !== undefined) return cfg.startSaldoIni;
-            const { startAsOfDate, startLastWeek } = cfg;
-            return cartera.reduce((s,f)=>{ const b=cxcBalAt(f,startAsOfDate,startLastWeek); return s+(b>0.01?b:0); },0);
-        }
+            // ── KPIs desde gestiones ──────────────────────────
+            const cobradas   = gestiones.filter(g => g.estado === 'Cobrado');
+            const pendientes = gestiones.filter(g => g.estado === 'Pendiente');
+            const seguims    = gestiones.filter(g => g.estado === 'Seguimiento');
+            const rotas      = gestiones.filter(g => g.estado === 'Incumplido');
 
-        // KPIs para el período seleccionado
-        function cxcComputeKPIs(key){
-            const cfg = CXC_PERIODS[key]; if(!cfg) return null;
-            const { sems, asOfDate, lastWeek, eStart, eEnd, diasPeriodo } = cfg;
-            let facturado=0, carteraTot=0, porVencer=0, vencida=0;
-            // facturación del período
-            cartera.forEach(f=>{
-                const ed=f.emision?new Date(f.emision+'T00:00:00'):null;
-                if(ed&&ed>=eStart&&ed<=eEnd) facturado+=(f.baseImponible||0);
-            });
-            // cartera al corte del período
-            cartera.forEach(f=>{
-                const b=cxcBalAt(f,asOfDate,lastWeek); if(b<=0.01) return;
-                carteraTot+=b;
-                const v=f.vencimiento?new Date(f.vencimiento+'T00:00:00'):null;
-                if(!v||v>asOfDate) porVencer+=b; else vencida+=b;
-            });
-            // cobrado en el período = suma de semanas del período
-            const cobrado = cartera.reduce((s,f)=>s+sems.reduce((a,w)=>a+(f.semanas&&f.semanas[w-1]||0),0),0);
-            const saldoIni = cxcSaldoIni(cfg);
-            const dispCobrar = saldoIni + facturado;
-            const esperado   = dispCobrar - porVencer;
-            const eficacia   = esperado > 0 ? (cobrado/esperado*100) : NaN;
-            const dso        = facturado > 0 ? (carteraTot/facturado*diasPeriodo) : NaN;
-            return { facturado, cartera:carteraTot, porVencer, vencida, cobrado,
-                     eficacia, dso, saldoIni, esperado, dispCobrar };
-        }
+            const totalCobrado   = cobradas.reduce((s,g)=>s+(Number(g.valorRecuperado)||0), 0);
+            const totalPendiente = pendientes.reduce((s,g)=>s+(Number(g.saldoPendiente)||0), 0);
+            const totalGest      = totalCobrado + totalPendiente;
+            const efectividad    = totalGest > 0 ? (totalCobrado/totalGest*100) : NaN;
 
-        // Aging al corte
-        function cxcCalcAging(key){
-            const cfg=CXC_PERIODS[key]; if(!cfg) return null;
-            const{asOfDate,lastWeek}=cfg;
-            const b={b30:0,b60:0,b90:0,b120:0,b120p:0};
-            cartera.forEach(f=>{
-                const bal=cxcBalAt(f,asOfDate,lastWeek); if(bal<=0.01) return;
-                const v=f.vencimiento?new Date(f.vencimiento+'T00:00:00'):null; if(!v||v>asOfDate) return;
-                const dias=Math.floor((asOfDate-v)/864e5);
-                if(dias<=30)b.b30+=bal; else if(dias<=60)b.b60+=bal;
-                else if(dias<=90)b.b90+=bal; else if(dias<=120)b.b120+=bal; else b.b120p+=bal;
-            });
-            return b;
-        }
-
-        // Datos cobranza para el gráfico (Sem o Mes)
-        function cxcCobrosData(key, mode){
-            const cfg=CXC_PERIODS[key]; if(!cfg) return{labels:[],data:[]};
-            const{sems}=cfg;
-            const weekStart=new Date(2025,11,29);
-            if(mode==='sem'){
-                return{
-                    labels: sems.map(s=>`S${s}`),
-                    data:   sems.map(w=>cartera.reduce((s,f)=>s+(f.semanas&&f.semanas[w-1]||0),0))
-                };
-            }
-            // Mes: agrupar semanas del período por mes calendario
-            const monthly={};
-            sems.forEach(w=>{
-                const mid=new Date(weekStart.getTime()+(w-1)*7*864e5+3*864e5);
-                const m=mid.getMonth();
-                if(!monthly[m]) monthly[m]=0;
-                monthly[m]+=cartera.reduce((s,f)=>s+(f.semanas&&f.semanas[w-1]||0),0);
-            });
-            const sorted=Object.keys(monthly).sort((a,b)=>+a-+b);
-            return{labels:sorted.map(m=>MESES_CXC[m]), data:sorted.map(m=>monthly[m])};
-        }
-
-        // Datos facturación para el gráfico — siempre por mes
-        function cxcFactData(key){
-            const cfg=CXC_PERIODS[key]; if(!cfg) return{labels:[],data:[]};
-            const{eStart,eEnd}=cfg;
-            const monthly={};
-            cartera.forEach(f=>{
-                const ed=f.emision?new Date(f.emision+'T00:00:00'):null;
-                if(!ed||ed<eStart||ed>eEnd) return;
-                const m=ed.getMonth(); if(!monthly[m]) monthly[m]=0;
-                monthly[m]+=(f.baseImponible||0);
-            });
-            const sorted=Object.keys(monthly).sort((a,b)=>+a-+b);
-            return{labels:sorted.map(m=>MESES_CXC[m]),data:sorted.map(m=>monthly[m])};
-        }
-
-        // Top 10 clientes al corte del período
-        function cxcTop10(key){
-            const cfg=CXC_PERIODS[key]; if(!cfg) return[];
-            const{asOfDate,lastWeek}=cfg; const map={};
-            cartera.forEach(f=>{
-                const bal=cxcBalAt(f,asOfDate,lastWeek); if(bal<=0.01) return;
-                if(!map[f.cliente]) map[f.cliente]={saldo:0,maxDias:0};
-                map[f.cliente].saldo+=bal;
-                if(f.dias>0) map[f.cliente].maxDias=Math.max(map[f.cliente].maxDias,f.dias);
-            });
-            return Object.entries(map).map(([k,v])=>({cliente:k,...v}))
-                .filter(x=>x.saldo>0.01).sort((a,b)=>b.saldo-a.saldo).slice(0,10);
-        }
-
-        // Tendencia YTD (cartera y vencida al fin de cada mes)
-        function cxcTrendData(){
-            const puntos=[
-                {label:'Ene',asOfDate:new Date(2026,0,31),lastWeek:4},
-                {label:'Feb',asOfDate:new Date(2026,1,28),lastWeek:8},
-                {label:'Mar',asOfDate:new Date(2026,2,31),lastWeek:13},
-                {label:'Abr',asOfDate:new Date(2026,3,30),lastWeek:18},
-                {label:'May',asOfDate:new Date(2026,4,19),lastWeek:21},
-            ];
-            return{
-                labels: puntos.map(p=>p.label),
-                cartera: puntos.map(p=>cartera.reduce((s,f)=>{const b=cxcBalAt(f,p.asOfDate,p.lastWeek);return s+(b>0.01?b:0);},0)),
-                vencida: puntos.map(p=>cartera.reduce((s,f)=>{
-                    const b=cxcBalAt(f,p.asOfDate,p.lastWeek); if(b<=0.01) return s;
-                    const v=f.vencimiento?new Date(f.vencimiento+'T00:00:00'):null;
-                    return s+(v&&v<=p.asOfDate?b:0);
-                },0)),
+            const sk = (id, val, subId, sub) => {
+                const e=document.getElementById(id); if(e) e.textContent=val;
+                const s=document.getElementById(subId); if(s) s.textContent=sub;
             };
-        }
+            sk('dg-kpi-cobrado',  dgFmt(totalCobrado),  'dg-kpi-cobrado-sub',  cobradas.length+' cobros · '+dgFmt(totalCobrado,true));
+            sk('dg-kpi-promesas', dgFmt(totalPendiente),'dg-kpi-promesas-sub', pendientes.length+' activas · '+dgFmt(totalPendiente,true));
+            sk('dg-kpi-seguim',   seguims.length,        'dg-kpi-seguim-sub',  seguims.length+' facturas en seguimiento');
+            sk('dg-kpi-rotas',    rotas.length,           'dg-kpi-rotas-sub',  rotas.length+' promesas incumplidas');
+            sk('dg-kpi-total',    dgFmt(totalGest),      'dg-kpi-total-sub',   gestiones.length+' gestiones totales');
+            sk('dg-kpi-efect',    isNaN(efectividad)?'—':efectividad.toFixed(1)+'%','dg-kpi-efect-sub', 'Cobrado vs Total Gestionado');
 
-        // ── Gauge KPI 5-6 ─────────────────────────────────────────────
-        function renderCxcGauge(val){
-            if(cxcCharts.gauge){cxcCharts.gauge.destroy();delete cxcCharts.gauge;}
-            const canvas=document.getElementById('cxc-gauge'); if(!canvas) return;
-            const v=isNaN(val)||!isFinite(val)?0:Math.min(Math.max(val,0),150);
-            const N=30,sz=150/N,filled=Math.floor(v/sz),rem=v-filled*sz;
-            function sc(i,a){
-                const t=i/(N-1);let r,g,b;
-                if(t<.33){const f=t/.33;r=239;g=Math.round(68+f*100);b=68;}
-                else if(t<.66){const f=(t-.33)/.33;r=Math.round(239-f*50);g=Math.round(168+f*60);b=68;}
-                else{const f=(t-.66)/.34;r=Math.round(189-f*140);g=Math.round(228+f*10);b=Math.round(68+f*50);}
-                return a<1?`rgba(${r},${g},${b},${a})`:`rgb(${r},${g},${b})`;
-            }
-            const bg=[],br=[];
-            for(let i=0;i<N;i++){
-                if(i<filled){bg.push(sc(i,1));br.push(sc(i,1));}
-                else if(i===filled&&rem>.5){bg.push(sc(i,.6));br.push(sc(i,.6));}
-                else{bg.push('rgba(255,255,255,.06)');br.push('rgba(255,255,255,.06)');}
-            }
-            cxcCharts.gauge=new Chart(canvas.getContext('2d'),{
+            // ── Destruir charts anteriores ────────────────────
+            Object.keys(dgCharts).forEach(k=>{ if(dgCharts[k]){dgCharts[k].destroy();delete dgCharts[k];} });
+
+            // ── 1. Donut estado gestiones ─────────────────────
+            dgCharts.donut = new Chart(document.getElementById('dg-c-donut').getContext('2d'),{
                 type:'doughnut',
-                data:{datasets:[{data:Array(N).fill(1),backgroundColor:bg,borderColor:br,
-                    borderWidth:1.5,circumference:180,rotation:270,borderRadius:2}]},
-                plugins:[{id:'gt',afterDraw(chart){
-                    const{ctx,chartArea:{left,right,bottom}}=chart;
-                    const cx=(left+right)/2,cy=bottom-8;
-                    ctx.save();
-                    ctx.fillStyle='#fff';ctx.font='bold 20px ui-sans-serif,sans-serif';ctx.textAlign='center';
-                    ctx.fillText(isNaN(val)||!isFinite(val)?'—':val.toFixed(1)+'%',cx,cy);
-                    ctx.font='9px ui-sans-serif,sans-serif';ctx.fillStyle='#94a3b8';
-                    ctx.fillText('eficacia cobranza',cx,cy+14);ctx.restore();
-                }}],
-                options:{responsive:true,maintainAspectRatio:false,cutout:'68%',
-                    plugins:{legend:{display:false},datalabels:{display:false},tooltip:{enabled:false}}}
+                data:{ labels:['Cobrado','Pendiente','Seguimiento','Incumplido'],
+                    datasets:[{data:[cobradas.length, pendientes.length, seguims.length, rotas.length],
+                    backgroundColor:['#10b981','#f59e0b','#38bdf8','#f87171'],
+                    borderColor:'#111827', borderWidth:3}]},
+                options:{ responsive:true, maintainAspectRatio:false, cutout:'60%',
+                    plugins:{ legend:{position:'bottom',labels:{color:'#fff',font:{size:11},padding:10,boxWidth:10}},
+                    datalabels:{color:'#fff',formatter:(v,ctx)=>{const t=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);return t>0&&v>0?(v/t*100).toFixed(0)+'%':'';},font:{weight:'bold',size:12}},
+                    tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw} gestiones`}}}}
             });
-        }
 
-        // ── Desglose tabla KPI 5-6 ───────────────────────────────────
-        function renderCxcDesglose(kpis){
-            const el=document.getElementById('cxc-desglose-table'); if(!el||!kpis) return;
-            const f=n=>cxcFmt(n,true);
-            el.innerHTML=`
-            <table style="border-collapse:separate;border-spacing:0 2px;width:100%"><tbody>
-              <tr><td class="py-0.5 px-1 text-[10px] font-bold uppercase" style="color:#60a5fa">SI CxC</td>
-                  <td class="py-0.5 px-1 text-right text-[10px] font-semibold text-white">${f(kpis.saldoIni)}</td></tr>
-              <tr><td class="py-0.5 px-1 text-[10px] font-bold uppercase" style="color:#60a5fa">Ventas</td>
-                  <td class="py-0.5 px-1 text-right text-[10px] font-semibold text-white">${f(kpis.facturado)}</td></tr>
-              <tr><td class="py-0.5 px-1 text-[10px] font-bold uppercase" style="color:#60a5fa">SF CxC</td>
-                  <td class="py-0.5 px-1 text-right text-[10px] font-semibold text-white">${f(kpis.cartera)}</td></tr>
-              <tr style="background:rgba(30,58,138,.3)">
-                  <td class="py-0.5 px-1 text-[10px] font-bold uppercase" style="color:#93c5fd">Deuda Corriente</td>
-                  <td class="py-0.5 px-1 text-right text-[10px] font-bold" style="color:#93c5fd">${f(kpis.porVencer)}</td></tr>
-              <tr><td colspan="2" class="py-0.5"><div style="border-top:1px solid #334155"></div></td></tr>
-              <tr><td class="py-0.5 px-1 text-[10px] font-bold uppercase" style="color:#34d399">Disponible a Cobrar</td>
-                  <td class="py-0.5 px-1 text-right text-[10px] font-bold" style="color:#34d399">${f(kpis.dispCobrar)}</td></tr>
-              <tr style="background:rgba(127,29,29,.4)">
-                  <td class="py-1 px-1 text-[10px] font-bold uppercase" style="color:#fca5a5">Monto Cobrado (KPI 5)</td>
-                  <td class="py-1 px-1 text-right text-[10px] font-bold" style="color:#fca5a5">${f(kpis.cobrado)}</td></tr>
-              <tr><td class="py-0.5 px-1 text-[10px] font-bold uppercase" style="color:#fbbf24">Monto q/se Espera Cobrar</td>
-                  <td class="py-0.5 px-1 text-right text-[10px] font-bold" style="color:#fbbf24">${f(kpis.esperado)}</td></tr>
-              <tr style="background:rgba(14,116,144,.35)">
-                  <td class="py-1 px-1 text-[10px] font-bold uppercase" style="color:#67e8f9">Resultado (KPI 6)</td>
-                  <td class="py-1 px-1 text-right font-bold text-base" style="color:#67e8f9">${isNaN(kpis.eficacia)?'—':kpis.eficacia.toFixed(2)+'%'}</td></tr>
-            </tbody></table>`;
-        }
-
-        // ── Cobranza chart con toggle Sem/Mes ────────────────────────
-        function setCobMode(mode){
-            cxcCobMode=mode;
-            document.getElementById('cob-btn-sem').classList.toggle('active',mode==='sem');
-            document.getElementById('cob-btn-mes').classList.toggle('active',mode==='mes');
-            renderCxcCobChart();
-        }
-        function renderCxcCobChart(){
-            if(cxcCharts.cob){cxcCharts.cob.destroy();delete cxcCharts.cob;}
-            if(!cartera||!cartera.length) return;
-            const d=cxcCobrosData(cxcFilter,cxcCobMode);
-            cxcCharts.cob=new Chart(document.getElementById('cxc-c-cob').getContext('2d'),{
+            // ── 2. Cobranza mensual (cobros reales por mes) ───
+            const cobMes = {};
+            cobradas.forEach(g=>{
+                const f = normFechaG(g.fechaPromesa||g.fechaGestion||'');
+                if(!f) return;
+                const m = parseInt(f.split('-')[1])-1;
+                if(!isNaN(m)) cobMes[m]=(cobMes[m]||0)+(Number(g.valorRecuperado)||0);
+            });
+            const cKeys = Object.keys(cobMes).sort((a,b)=>+a-+b);
+            dgCharts.cob = new Chart(document.getElementById('dg-c-cob').getContext('2d'),{
                 type:'line',
-                data:{labels:d.labels.length?d.labels:['Sin datos'],
-                    datasets:[{label:'Cobrado',data:d.data.length?d.data:[0],
-                    borderColor:'#34d399',backgroundColor:'rgba(52,211,153,.12)',fill:true,
-                    tension:.35,pointRadius:5,pointBackgroundColor:'#34d399',
-                    pointBorderColor:'#fff',pointBorderWidth:1.5}]},
-                options:{responsive:true,maintainAspectRatio:false,
+                data:{ labels: cKeys.length ? cKeys.map(m=>MESES_DG[+m]) : ['Sin datos'],
+                    datasets:[{label:'Cobrado',data:cKeys.length?cKeys.map(m=>cobMes[m]):[0],
+                    borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.1)',fill:true,
+                    tension:.35,pointRadius:5,pointBackgroundColor:'#10b981',pointBorderColor:'#fff',pointBorderWidth:2}]},
+                options:{ responsive:true, maintainAspectRatio:false,
                     plugins:{legend:{display:false},
-                    datalabels:{display:true,anchor:'end',align:'top',color:'#fff',font:{size:9,weight:'bold'},formatter:v=>v>0?cxcFmt(v):''},
-                    tooltip:{callbacks:{label:ctx=>cxcFmt(ctx.raw,true)}}},
+                    datalabels:{display:true,anchor:'end',align:'top',color:'#fff',font:{size:9,weight:'bold'},formatter:v=>v>0?dgFmt(v):''},
+                    tooltip:{callbacks:{label:ctx=>dgFmt(ctx.raw,true)}}},
                     scales:{x:{ticks:{color:'#cbd5e1',font:{size:10}},grid:{display:false}},
-                    y:{ticks:{color:'#94a3b8',callback:v=>cxcFmt(v),font:{size:9}},
-                    grid:{color:'rgba(255,255,255,.05)'},beginAtZero:true}}}
+                    y:{ticks:{color:'#94a3b8',callback:v=>dgFmt(v),font:{size:9}},grid:{color:'rgba(255,255,255,.05)'},beginAtZero:true}}}
             });
-        }
 
-        // ── RENDER PRINCIPAL ─────────────────────────────────────────
-        function setCxcFilter(key,btn){
-            cxcFilter=key;
-            document.querySelectorAll('.filt-btn').forEach(b=>b.classList.remove('active'));
-            if(btn) btn.classList.add('active');
-            // Restaurar estado del toggle Sem/Mes
-            document.getElementById('cob-btn-sem').classList.toggle('active',cxcCobMode==='sem');
-            document.getElementById('cob-btn-mes').classList.toggle('active',cxcCobMode==='mes');
-            renderCxcDashboard();
-        }
-
-        function renderCxcDashboard(){
-            const hasData = cartera && cartera.length > 0;
-            document.getElementById('cxc-empty').classList.toggle('hidden', hasData);
-            if(!hasData) return;
-
-            const cfg = CXC_PERIODS[cxcFilter];
-            if(!cfg){ document.getElementById('cxc-corte-lbl').textContent='Sin datos en este período'; return; }
-
-            const extra = cfg.diasPeriodo < 60 ? ' (parcial)' : '';
-            document.getElementById('cxc-corte-lbl').textContent =
-                `${cfg.label}${extra} · Sem. ${cfg.sems[0]}–${cfg.sems[cfg.sems.length-1]} · ${cartera.length} facturas`;
-
-            // ── Calcular KPIs ─────────────────────────────────────
-            const kpis = cxcComputeKPIs(cxcFilter);
-            if(!kpis) return;
-
-            // ── Actualizar tarjetas KPI ────────────────────────────
-            const sk=(id,val,clr,subId,sub)=>{
-                const el=document.getElementById(id); if(el) el.textContent=val;
-                const sl=document.getElementById(subId); if(sl) sl.textContent=sub;
-            };
-            sk('kpi-cxc-fact',   cxcFmt(kpis.facturado),  'kpi-cxc-fact-sub',  cxcFmt(kpis.facturado,true));
-            sk('kpi-cxc-cartera',cxcFmt(kpis.cartera),    'kpi-cxc-cartera-sub',cxcFmt(kpis.cartera,true));
-            sk('kpi-cxc-pv',     cxcFmt(kpis.porVencer),  'kpi-cxc-pv-sub',    cxcFmt(kpis.porVencer,true));
-            sk('kpi-cxc-venc',   cxcFmt(kpis.vencida),    'kpi-cxc-venc-sub',  cxcFmt(kpis.vencida,true));
-            sk('kpi-cxc-cob',    cxcFmt(kpis.cobrado),    'kpi-cxc-cob-sub',   cfg.sems.length+' semanas');
-            sk('kpi-cxc-efic',   isNaN(kpis.eficacia)?'—':kpis.eficacia.toFixed(1)+'%','kpi-cxc-efic-sub','Esp: '+cxcFmt(kpis.esperado));
-            sk('kpi-cxc-dso',    isNaN(kpis.dso)?'—':Math.round(kpis.dso)+' d','kpi-cxc-dso-sub',cfg.diasPeriodo+' días período');
-
-            // ── Destruir charts anteriores ────────────────────────
-            Object.keys(cxcCharts).forEach(k=>{ if(cxcCharts[k]){cxcCharts[k].destroy();delete cxcCharts[k];} });
-
-            // ── 1. Facturación ─────────────────────────────────────
-            const fd = cxcFactData(cxcFilter);
-            document.getElementById('cxc-fact-label').textContent = 'Base imponible · '+cfg.label;
-            cxcCharts.fact=new Chart(document.getElementById('cxc-c-fact').getContext('2d'),{
+            // ── 3. Próximas promesas (30 días) ────────────────
+            const hoy = new Date(); hoy.setHours(0,0,0,0);
+            const en30 = new Date(hoy.getTime()+30*864e5);
+            const proximas = pendientes.filter(g=>{
+                const f=normFechaG(g.fechaPromesa||''); if(!f) return false;
+                const d=new Date(f+'T00:00:00'); return d>=hoy && d<=en30;
+            });
+            // agrupar por día de la semana / fecha
+            const porDia={};
+            proximas.forEach(g=>{
+                const f=normFechaG(g.fechaPromesa);
+                porDia[f]=(porDia[f]||0)+(Number(g.saldoPendiente)||0);
+            });
+            const dKeys=Object.keys(porDia).sort();
+            const dLabels=dKeys.map(k=>{ const d=new Date(k+'T00:00:00'); return `${d.getDate()}/${d.getMonth()+1}`; });
+            dgCharts.proximas = new Chart(document.getElementById('dg-c-proximas').getContext('2d'),{
                 type:'bar',
-                data:{labels:fd.labels.length?fd.labels:['Sin datos'],
-                    datasets:[{label:'Facturado',data:fd.data.length?fd.data:[0],
-                    backgroundColor:'rgba(96,165,250,.7)',borderColor:'#93c5fd',borderWidth:1,borderRadius:5}]},
-                options:{responsive:true,maintainAspectRatio:false,
+                data:{ labels:dLabels.length?dLabels:['Sin promesas'],
+                    datasets:[{label:'Monto prometido',data:dLabels.length?dKeys.map(k=>porDia[k]):[0],
+                    backgroundColor:'rgba(245,158,11,.75)',borderColor:'#fbbf24',borderWidth:1,borderRadius:5}]},
+                options:{ responsive:true, maintainAspectRatio:false,
                     plugins:{legend:{display:false},
-                    datalabels:{display:true,anchor:'end',align:'end',color:'#fff',font:{size:9,weight:'bold'},formatter:v=>v>0?cxcFmt(v):''},
-                    tooltip:{callbacks:{label:ctx=>cxcFmt(ctx.raw,true)}}},
-                    scales:{x:{ticks:{color:'#cbd5e1',font:{size:10}},grid:{display:false}},
-                    y:{ticks:{color:'#94a3b8',callback:v=>cxcFmt(v),font:{size:9}},grid:{color:'rgba(255,255,255,.05)'}}}}
+                    datalabels:{display:true,anchor:'end',align:'end',color:'#fff',font:{size:9,weight:'bold'},formatter:v=>v>0?dgFmt(v):''},
+                    tooltip:{callbacks:{label:ctx=>dgFmt(ctx.raw,true)}}},
+                    scales:{x:{ticks:{color:'#cbd5e1',font:{size:9}},grid:{display:false}},
+                    y:{ticks:{color:'#94a3b8',callback:v=>dgFmt(v),font:{size:9}},grid:{color:'rgba(255,255,255,.05)'},beginAtZero:true}}}
             });
 
-            // ── 2. Cobranza (LINE, respeta modo Sem/Mes) ──────────
-            renderCxcCobChart();
-
-            // ── 3. Donut estado cartera ────────────────────────────
-            cxcCharts.donut=new Chart(document.getElementById('cxc-c-donut').getContext('2d'),{
-                type:'doughnut',
-                data:{labels:['Por Vencer','Vencida'],
-                    datasets:[{data:[Math.max(0,kpis.porVencer),Math.max(0,kpis.vencida)],
-                    backgroundColor:['#34d399','#f87171'],borderColor:'#111827',borderWidth:3}]},
-                options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
-                    plugins:{legend:{position:'bottom',labels:{color:'#fff',font:{size:11},padding:12}},
-                    datalabels:{color:'#fff',formatter:(v,ctx)=>{const t=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);return t>0?(v/t*100).toFixed(1)+'%':'';},font:{weight:'bold',size:12}},
-                    tooltip:{callbacks:{label:ctx=>ctx.label+': '+cxcFmt(ctx.raw,true)}}}}
-            });
-
-            // ── 4. Aging ──────────────────────────────────────────
-            const ag = cxcCalcAging(cxcFilter);
-            cxcCharts.aging=new Chart(document.getElementById('cxc-c-aging').getContext('2d'),{
-                type:'bar',
-                data:{labels:['+120 días','91-120 días','61-90 días','31-60 días','1-30 días'],
-                    datasets:[{data:[ag.b120p,ag.b120,ag.b90,ag.b60,ag.b30],
-                    backgroundColor:['#fca5a5','#fb923c','#fbbf24','#86efac','#6ee7b7'],borderRadius:4}]},
-                options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-                    plugins:{legend:{display:false},
-                    datalabels:{display:true,anchor:'end',align:'end',color:'#fff',font:{size:10,weight:'bold'},formatter:v=>v>0?cxcFmt(v):''},
-                    tooltip:{callbacks:{label:ctx=>cxcFmt(ctx.raw,true)}}},
-                    scales:{x:{ticks:{color:'#94a3b8',callback:v=>cxcFmt(v),font:{size:9}},grid:{color:'rgba(255,255,255,.05)'}},
-                    y:{ticks:{color:'#fff',font:{size:11}},grid:{display:false}}}}
-            });
-
-            // ── 5. Tendencia YTD ──────────────────────────────────
-            const tr=cxcTrendData();
-            cxcCharts.trend=new Chart(document.getElementById('cxc-c-trend').getContext('2d'),{
-                type:'bar',
-                data:{labels:tr.labels,datasets:[
-                    {label:'Cartera Total',data:tr.cartera,backgroundColor:'rgba(96,165,250,.45)',borderColor:'#60a5fa',borderWidth:1,borderRadius:4,order:2},
-                    {label:'Vencida',data:tr.vencida,type:'line',borderColor:'#f87171',backgroundColor:'rgba(248,113,113,.1)',
-                     fill:true,tension:.3,pointRadius:5,pointBackgroundColor:'#f87171',pointBorderColor:'#fff',pointBorderWidth:2,order:1}
-                ]},
-                options:{responsive:true,maintainAspectRatio:false,
-                    plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:10},padding:10,boxWidth:10}},
-                    datalabels:{display:false},
-                    tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+cxcFmt(ctx.raw,true)}}},
-                    scales:{x:{ticks:{color:'#cbd5e1',font:{size:11}},grid:{display:false}},
-                    y:{ticks:{color:'#94a3b8',callback:v=>cxcFmt(v),font:{size:9}},grid:{color:'rgba(255,255,255,.05)'}}}}
-            });
-
-            // ── 6. Gauge + Desglose ───────────────────────────────
-            setTimeout(()=>{ renderCxcGauge(kpis.eficacia); }, 50);
-            renderCxcDesglose(kpis);
-
-            // ── 7. Top 10 ─────────────────────────────────────────
-            const top10 = cxcTop10(cxcFilter);
-            const tbody = document.getElementById('cxc-top10-body');
-            if(tbody) tbody.innerHTML = top10.map((c,i)=>{
-                const matchG = gestiones.find(g=>g.cliente===c.cliente);
-                let badge='<span class="text-[9px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">Pendiente</span>';
-                if(matchG){
-                    if(matchG.estado==='Cobrado') badge='<span class="text-[9px] bg-emerald-600 text-white px-1.5 py-0.5 rounded">Cobrado</span>';
-                    else badge='<span class="text-[9px] bg-indigo-600 text-white px-1.5 py-0.5 rounded">Gestionado</span>';
-                }
-                return `<tr class="hover:bg-[#1e293b]/50">
-                  <td class="px-4 py-2 text-slate-400">${i+1}</td>
-                  <td class="px-2 py-2 text-white max-w-[180px] truncate" title="${c.cliente}">${c.cliente}</td>
-                  <td class="px-2 py-2 text-right font-mono text-amber-400 font-bold">${cxcFmt(c.saldo,true)}</td>
-                  <td class="px-2 py-2 text-center">${badge}</td>
-                </tr>`;
-            }).join('');
+            // ── 4. Tabla gestiones activas ────────────────────
+            // Agrupar por cliente: mostrar promesas pendientes y seguimientos
+            const activos = [...pendientes, ...seguims]
+                .sort((a,b)=>{
+                    const fa=normFechaG(a.fechaPromesa||a.fechaSeguimiento||'');
+                    const fb=normFechaG(b.fechaPromesa||b.fechaSeguimiento||'');
+                    return fa.localeCompare(fb);
+                });
+            const tbody = document.getElementById('dg-tabla-activas');
+            if(tbody) tbody.innerHTML = activos.length
+                ? activos.map(g=>{
+                    const esPromesa = g.estado === 'Pendiente';
+                    const fecha = normFechaG(esPromesa ? g.fechaPromesa : g.fechaSeguimiento);
+                    const fechaFmt = fecha ? (()=>{const d=new Date(fecha+'T00:00:00');return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();})() : '—';
+                    const vencido = fecha && new Date(fecha+'T00:00:00') < hoy;
+                    const monto = esPromesa ? (Number(g.saldoPendiente)||0) : 0;
+                    const badge = esPromesa
+                        ? `<span class="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-bold">Promesa</span>`
+                        : `<span class="text-[9px] bg-sky-500/20 text-sky-300 px-1.5 py-0.5 rounded font-bold">📅 Seg.</span>`;
+                    return `<tr class="hover:bg-[#1e293b]/30 text-[11px]">
+                        <td class="px-3 py-2 font-semibold text-white max-w-[120px] truncate" title="${g.cliente}">${g.cliente}</td>
+                        <td class="px-2 py-2 text-right font-mono text-amber-400 font-bold">${monto>0?dgFmt(monto,true):'—'}</td>
+                        <td class="px-2 py-2 text-center">${badge}</td>
+                        <td class="px-2 py-2 text-center text-[10px] ${vencido?'text-rose-400 font-bold':'text-slate-300'}">${fechaFmt}${vencido?' ⚠':''}
+                        </td>
+                    </tr>`;
+                }).join('')
+                : '<tr><td colspan="4" class="p-4 text-center text-slate-500 italic text-xs">Sin gestiones activas</td></tr>';
         }
 
     </script>
