@@ -215,9 +215,11 @@
                 <!-- Filtros -->
                 <div class="fin-card p-4 rounded-2xl flex flex-wrap items-center gap-2">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Mostrar:</span>
-                    <button class="filt-btn active" id="gfilt-todos"   onclick="setGestFiltro('todos')">Todos</button>
-                    <button class="filt-btn"         id="gfilt-promesa"  onclick="setGestFiltro('promesa')">💰 Promesa de Pago</button>
-                    <button class="filt-btn"         id="gfilt-seguimiento" onclick="setGestFiltro('seguimiento')">📅 Seguimiento</button>
+                    <button class="filt-btn active" id="gfilt-activo"        onclick="setGestFiltro('activo')">⚡ Activo</button>
+                    <button class="filt-btn"         id="gfilt-promesa"       onclick="setGestFiltro('promesa')">💰 Promesa de Pago</button>
+                    <button class="filt-btn"         id="gfilt-seguimiento"   onclick="setGestFiltro('seguimiento')">📅 Seguimiento</button>
+                    <button class="filt-btn"         id="gfilt-cobrado"       onclick="setGestFiltro('cobrado')">✅ Cobrado</button>
+                    <button class="filt-btn"         id="gfilt-todos"         onclick="setGestFiltro('todos')">Todos</button>
                     <span class="ml-auto text-[10px] text-slate-500 font-mono" id="gfilt-count"></span>
                 </div>
 
@@ -569,14 +571,18 @@
             document.getElementById(`nav-${view}`).classList.add('tab-active');
 
             const headers = {
-                dashboard: 'Dashboard CxC Plastimet S.A.', crm: 'Matriz de Antigüedad por Cliente', gestionado: 'Bitácora de Gestión Activa',
+                dashboard: 'Dashboard Gestión de Cobranzas', crm: 'Matriz de Antigüedad por Cliente', gestionado: 'Gestión de Cobranzas · Activos',
                 flujo: 'Pronóstico de Caja Semanal', sync: 'Sincronizar Datos Plastimet'
             };
             document.getElementById('page-title').innerText = headers[view];
 
             if(view === 'dashboard') renderCxcDashboard();
             if(view === 'crm') renderCRMTable();
-            if(view === 'gestionado') renderGestionadoTable();
+            if(view === 'gestionado') {
+                // Reset to 'activo' filter only if coming from outside
+                if(gestFiltro !== 'cobrado' && gestFiltro !== 'seguimiento') setGestFiltro('activo');
+                else renderGestionadoTable();
+            }
             if(view === 'flujo') renderFlujoChart();
         }
 
@@ -965,12 +971,13 @@
         }
 
         // ── Lo Gestionado — filtro y renderizado ─────────────────────
-        let gestFiltro = 'todos';
+        let gestFiltro = 'activo'; // default: solo activos
 
         function setGestFiltro(f) {
             gestFiltro = f;
-            ['todos','promesa','seguimiento'].forEach(k => {
-                document.getElementById('gfilt-'+k).classList.toggle('active', k===f);
+            ['activo','promesa','seguimiento','cobrado','todos'].forEach(k => {
+                const btn = document.getElementById('gfilt-'+k);
+                if(btn) btn.classList.toggle('active', k===f);
             });
             const esCalendario = f === 'seguimiento';
             document.getElementById('gest-vista-tabla').classList.toggle('hidden', esCalendario);
@@ -998,10 +1005,14 @@
                 renderCalendarioSeguimiento(); return;
             }
 
-            // Filtrar para tabla
+            // Filtrar para tabla según modo
             let lista = [...gestiones].reverse();
-            if(gestFiltro === 'promesa')
-                lista = lista.filter(g => ['Pendiente','Cobrado','Incumplido'].includes(g.estado));
+            if(gestFiltro === 'activo')
+                lista = lista.filter(g => ['Pendiente','Seguimiento'].includes(g.estado));
+            else if(gestFiltro === 'promesa')
+                lista = lista.filter(g => g.estado === 'Pendiente');
+            else if(gestFiltro === 'cobrado')
+                lista = lista.filter(g => g.estado === 'Cobrado');
 
             const total = lista.length;
             document.getElementById('gfilt-count').textContent = total + ' registros';
@@ -1019,8 +1030,9 @@
                             <button onclick="borrarTranche('${g.id}')" class="text-slate-500 hover:text-rose-400 px-1" title="Eliminar seguimiento"><i class="fa-solid fa-trash text-[10px]"></i></button>
                         </div>`;
                     } else if(g.estado === 'Cobrado') {
-                        badge = `<span class="text-emerald-400 font-black uppercase text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded">PAGADO</span>`;
-                        actionButtons = `<button onclick="borrarTranche('${g.id}')" class="text-slate-600 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>`;
+                        const fechaCobro = fmtGestFecha(g.fechaPromesa || g.fechaGestion);
+                        badge = `<span class="text-emerald-400 font-black uppercase text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded">✅ PAGADO</span>`;
+                        actionButtons = `<button onclick="borrarTranche('${g.id}')" class="text-slate-500 hover:text-rose-400 px-1" title="Eliminar"><i class="fa-solid fa-trash text-[10px]"></i></button>`;
                     } else if(g.estado === 'Incumplido') {
                         badge = `<span class="text-rose-400 font-bold uppercase text-[10px] bg-rose-500/10 px-2 py-0.5 rounded line-through">ROTA</span>`;
                         actionButtons = `<button onclick="borrarTranche('${g.id}')" class="text-slate-600 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>`;
@@ -1034,8 +1046,11 @@
                     }
                     const fechaLabel = g.estado === 'Seguimiento'
                         ? `Seg: <b class="text-amber-300">${fmtGestFecha(g.fechaSeguimiento)}</b>`
-                        : `Prom: <b class="text-amber-400">${fmtGestFecha(g.fechaPromesa)}</b>`;
-                    return `<tr class="hover:bg-[#1e293b]/20 border-b border-[#334155]/20 text-[11px] ${g.estado==='Incumplido'?'opacity-50':''}">
+                        : g.estado === 'Cobrado'
+                            ? `Cobrado: <b class="text-emerald-300">${fmtGestFecha(g.fechaPromesa)}</b>`
+                            : `Prom: <b class="text-amber-400">${fmtGestFecha(g.fechaPromesa)}</b>`;
+                    const rowBg = g.estado==='Cobrado' ? 'bg-emerald-950/20' : g.estado==='Incumplido' ? 'opacity-50' : '';
+                    return `<tr class="hover:bg-[#1e293b]/30 border-b border-[#334155]/20 text-[11px] ${rowBg}">
                         <td class="px-3 py-2.5 font-bold text-white">${g.cliente}<br><span class="text-sky-400 font-mono text-[9px]">DOC: ${g.factura}</span><br><span class="text-slate-400 font-sans text-[9px] italic">${g.log||''}</span></td>
                         <td class="px-2 py-2.5 text-center text-slate-400 text-[9px]">${fmtGestFecha(g.fechaGestion)}<br>${fechaLabel}</td>
                         <td class="px-2 py-2.5 text-right font-mono text-sky-400">$${Number(g.valorSolicitado).toLocaleString(undefined,{minimumFractionDigits:2})}</td>
