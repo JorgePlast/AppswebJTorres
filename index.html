@@ -758,7 +758,9 @@
                 }
             });
 
-            const agrupado = cartera.filter(c=>c.saldo>0.01).reduce((acc, c) => {
+            // Excluir facturas ya cobradas (tienen gestión estado='Cobrado')
+            const cobradosIds = new Set(gestiones.filter(g=>g.estado==='Cobrado').map(g=>g.facturaId));
+            const agrupado = cartera.filter(c=>c.saldo>0.01 && !cobradosIds.has(c.id)).reduce((acc, c) => {
                 if (!acc[c.cliente]) {
                     acc[c.cliente] = { total: 0, facturas: [], rangos: { 'Corriente': 0, '1-30': 0, '31-60': 0, '61-90': 0, '91-120': 0, '120+': 0 } };
                 }
