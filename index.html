@@ -912,6 +912,15 @@
         }
         function closeModal() { modalGestion.classList.add('opacity-0'); setTimeout(() => modalGestion.classList.add('hidden'), 300); }
 
+        // Cierra el seguimiento activo de una factura (cuando pasa a promesa o cobrado)
+        function cerrarSeguimientoActivo(facturaId) {
+            const seg = gestiones.find(g => g.facturaId === facturaId && g.estado === 'Seguimiento');
+            if(!seg) return;
+            apiCall({ action: 'delete', id: seg.id });
+            const idx = gestiones.indexOf(seg);
+            if(idx !== -1) gestiones.splice(idx, 1);
+        }
+
         function guardarGestion(e) {
             e.preventDefault();
             const id       = document.getElementById('modal-factura-id').value;
@@ -1163,6 +1172,7 @@
                 gestiones[idx].valorRecuperado = recuperado;
                 gestiones[idx].saldoPendiente = gestiones[idx].valorSolicitado - recuperado;
                 gestiones[idx].estado = 'Cobrado';
+                const cobFacturaId = gestiones[idx].facturaId;
                 
                 apiCall({
                     action: 'update', id: gestiones[idx].id,
@@ -1170,8 +1180,18 @@
                     saldoPendiente: gestiones[idx].saldoPendiente,
                     estado: gestiones[idx].estado, log: gestiones[idx].log
                 });
+
+                // Cerrar seguimiento activo para esta factura
+                const segIdx = gestiones.findIndex(g => g.facturaId === cobFacturaId && g.estado === 'Seguimiento');
+                if(segIdx !== -1) {
+                    apiCall({ action: 'delete', id: gestiones[segIdx].id });
+                    gestiones.splice(segIdx, 1);
+                }
             }
-            closeRecaudoModal(); renderGestionadoTable();
+            closeRecaudoModal();
+            localStorage.setItem('plastimet_gestiones_cloud_backup', JSON.stringify(gestiones));
+            renderGestionadoTable();
+            renderCRMTable();
         }
 
         // REPROGRAMACIÓN (CLOUD)
