@@ -72,6 +72,10 @@
                     <i class="fa-solid fa-money-bill-trend-up text-base w-5 text-center text-emerald-400 flex-shrink-0"></i> 
                     <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Flujo de Caja</span>
                 </button>
+                <button onclick="switchView('reporte')" id="nav-reporte" class="w-full flex items-center gap-4 px-3 py-3 rounded-xl text-xs font-medium text-slate-400 hover:bg-[#1e293b] hover:text-white transition-all">
+                    <i class="fa-solid fa-chart-column text-base w-5 text-center text-violet-400 flex-shrink-0"></i>
+                    <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Dashboard CxC</span>
+                </button>
                 <button onclick="switchView('sync')" id="nav-sync" class="w-full flex items-center gap-4 px-3 py-3 rounded-xl text-xs font-medium text-slate-400 hover:bg-[#1e293b] hover:text-white transition-all">
                     <i class="fa-solid fa-rotate text-base w-5 text-center text-sky-400 flex-shrink-0"></i> 
                     <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Sincronizar</span>
@@ -328,6 +332,14 @@
             </section>
 
             <!-- VIEW: SYNC EXCEL -->
+            <!-- VIEW: DASHBOARD CXC (embebido, archivo independiente) -->
+            <section id="view-reporte" class="hidden">
+                <iframe id="reporte-frame" title="Dashboard CxC"
+                    class="w-full rounded-xl border border-[#334155] bg-[#0b0f19]"
+                    style="height: calc(100vh - 7rem); display:block;"
+                    data-src="Dasboard%20CxC.html"></iframe>
+            </section>
+
             <section id="view-sync" class="hidden max-w-3xl mx-auto space-y-6">
 
                 <!-- Estado de la cartera en la nube -->
@@ -770,7 +782,7 @@
 
 
         function switchView(view) {
-            ['dashboard', 'crm', 'llamar', 'gestionado', 'flujo', 'sync'].forEach(v => {
+            ['dashboard', 'crm', 'llamar', 'gestionado', 'flujo', 'reporte', 'sync'].forEach(v => {
                 document.getElementById(`view-${v}`).classList.add('hidden');
                 document.getElementById(`nav-${v}`).classList.remove('tab-active');
             });
@@ -779,7 +791,7 @@
 
             const headers = {
                 dashboard: 'Dashboard Gestión de Cobranzas', crm: 'Matriz de Antigüedad por Cliente', llamar: 'A Quién Llamar · Plan Inteligente', gestionado: 'Gestión de Cobranzas · Activos',
-                flujo: 'Pronóstico de Caja Semanal', sync: 'Sincronizar Datos Plastimet'
+                flujo: 'Pronóstico de Caja Semanal', reporte: 'Dashboard CxC · Análisis', sync: 'Sincronizar Datos Plastimet'
             };
             document.getElementById('page-title').innerText = headers[view];
 
@@ -792,6 +804,10 @@
                 else renderGestionadoTable();
             }
             if(view === 'flujo') renderFlujoChart();
+            if(view === 'reporte') {
+                const fr = document.getElementById('reporte-frame');
+                if(fr && !fr.src) fr.src = fr.dataset.src; // carga el dashboard solo la 1ra vez
+            }
         }
 
         function procesarSaldosExcel(e) {
@@ -1204,12 +1220,21 @@
             renderGestionadoTable();
         }
 
+        // Una factura está saldada si su saldo en cartera es 0 o ya tiene gestión Cobrado
+        function facturaSaldada(facturaId) {
+            const f = cartera.find(c => c.id === facturaId);
+            if(f && f.saldo <= 0.01) return true;
+            if(gestiones.some(g => g.facturaId === facturaId && g.estado === 'Cobrado')) return true;
+            return false;
+        }
+
         function renderGestionadoTable() {
             // Auto-rollover seguimientos vencidos → lunes siguiente
             const hoyDate = new Date(); hoyDate.setHours(0,0,0,0);
             let changed = false;
             gestiones.forEach(g => {
                 if(g.estado !== 'Seguimiento' || !g.fechaSeguimiento) return;
+                if(facturaSaldada(g.facturaId)) return;
                 const fsNorm = normFechaG(g.fechaSeguimiento);
                 const fs = new Date(fsNorm+'T00:00:00');
                 if(fs < hoyDate) {
@@ -1227,7 +1252,7 @@
             // Filtrar para tabla según modo
             let lista = [...gestiones].reverse();
             if(gestFiltro === 'activo')
-                lista = lista.filter(g => ['Pendiente','Seguimiento'].includes(g.estado));
+                lista = lista.filter(g => ['Pendiente','Seguimiento'].includes(g.estado) && !facturaSaldada(g.facturaId));
             else if(gestFiltro === 'promesa')
                 lista = lista.filter(g => g.estado === 'Pendiente');
             else if(gestFiltro === 'cobrado')
@@ -1283,7 +1308,7 @@
 
         // ── Calendario de Seguimiento ──────────────────────────────
         function renderCalendarioSeguimiento() {
-            const segs = gestiones.filter(g => g.estado === 'Seguimiento');
+            const segs = gestiones.filter(g => g.estado === 'Seguimiento' && !facturaSaldada(g.facturaId));
             const cont = document.getElementById('calendario-seguimiento');
             document.getElementById('gfilt-count').textContent = segs.length + ' en seguimiento';
 
